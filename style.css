@@ -1,0 +1,76 @@
+/* Custom utility classes and interactive elements */
+
+body {
+    background-color: #fafafa;
+    color: #1a1a1a;
+}
+
+.highlight-yellow {
+    background: linear-gradient(180deg, rgba(255,255,255,0) 60%, #fffb00 60%);
+}
+
+input[type=range] {
+    accent-color: #1a1a1a;
+    cursor: pointer;
+}
+
+/* Molecular Background */
+.molecule-bg {
+    background-color: #111;
+    background-image: 
+        radial-gradient(circle at 50% 50%, rgba(255, 251, 0, 0.1) 0%, transparent 50%),
+        linear-gradient(45deg, #1a1a1a 25%, transparent 25%, transparent 75%, #1a1a1a 75%, #1a1a1a),
+        linear-gradient(45deg, #1a1a1a 25%, transparent 25%, transparent 75%, #1a1a1a 75%, #1a1a1a);
+    background-size: 100% 100%, 20px 20px, 20px 20px;
+    background-position: 0 0, 0 0, 10px 10px;
+}
+
+/* Map Background using Wikimedia SVG */
+.map-bg {
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #e0f2fe; 
+}
+
+/* Ethnography Hotspots */
+.hotspot {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #fffb00;
+    border-radius: 50%;
+    cursor: pointer;
+    animation: pulse 2s infinite;
+    border: 3px solid #1a1a1a;
+    box-shadow: 0 0 10px rgba(255, 251, 0, 0.8);
+    transform: translate(-50%, -50%); 
+}
+
+@keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(0.95); box-shadow: 0 0 0 0 rgba(255, 251, 0, 0.7); }
+    70% { transform: translate(-50%, -50%) scale(1.2); box-shadow: 0 0 0 10px rgba(255, 251, 0, 0); }
+    100% { transform: translate(-50%, -50%) scale(0.95); box-shadow: 0 0 0 0 rgba(255, 251, 0, 0); }
+}
+
+.hotspot-content {
+    display: none;
+}
+
+.hotspot.active + .hotspot-content {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Chart Container Fix */
+.chart-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
