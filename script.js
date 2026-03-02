@@ -36,8 +36,8 @@ function setSynthesis(route) {
         btnPat.classList.add('border-brandDark', 'bg-white');
         cost.innerText = "$750.00"; 
         cost.className = "text-5xl font-bold text-scrollRed font-mono transition-colors duration-300";
+        state.patentActive = true; // explicitly link to chart logic
         if(glViewer) {
-            // "Monopoly" visualization
             glViewer.setStyle({}, {stick: {radius: 0.15, colorscheme: 'redCarbon'}});
             glViewer.render();
         }
@@ -45,8 +45,8 @@ function setSynthesis(route) {
         btnAlt.classList.add('border-brandDark', 'bg-white');
         cost.innerText = "$0.10"; 
         cost.className = "text-5xl font-bold text-green-500 font-mono transition-colors duration-300";
+        state.patentActive = false; // explicitly link to chart logic
         if(glViewer) {
-            // "Generic" visualization
             glViewer.setStyle({}, {
                 stick: {radius: 0.1, colorscheme: 'greenCarbon'}, 
                 sphere: {scale: 0.3, colorscheme: 'greenCarbon'}
@@ -59,6 +59,17 @@ function setSynthesis(route) {
 
 // --- 2. LEGAL LABYRINTH ---
 const legalCases = [
+    {
+        title: "Turing Pharmaceuticals vs. Free Market",
+        drug: "Pyrimethamine (Daraprim) - Toxoplasmosis",
+        claim: "This drug is off-patent, but we bought the only approved manufacturer. By putting it in a 'closed distribution system,' generic companies cannot buy the physical sample pills they legally need to run bioequivalence tests. We now have a de facto monopoly and will raise the price 5,400%.",
+        context: "Regulatory Loophole vs. Antitrust: In the US, exploiting restricted distribution blocked generic entry. Under Indian law (Competition Act, 2002), artificially restricting supply to stifle competition is an illegal abuse of dominance.",
+        rejectAction: "Apply Antitrust / Fine",
+        resultReject: "Correct. The Competition Commission of India (CCI) penalizes 'refusal to deal' tactics. The artificial monopoly is broken, allowing generic manufacturers (like IPCA) to supply the market at ~$0.10 per pill.",
+        resultGrant: "Incorrect. Allowing closed distribution loopholes results in catastrophic price hikes (from $13.50 to $750/pill) for essential, off-patent medicines.",
+        citation: "Real Case: FTC v. Vyera Pharmaceuticals, LLC (2022). US regulators eventually sued to stop this exact scheme, but the loophole delayed generic entry for years.",
+        opensMarket: true
+    },
     {
         title: "Novartis AG vs. Union of India",
         drug: "Imatinib Mesylate (Glivec) - Leukemia",
@@ -121,6 +132,10 @@ let currentCaseIndex = 0;
 function renderCase() {
     const c = legalCases[currentCaseIndex];
     document.getElementById('case-number').innerText = `00${currentCaseIndex + 1}`;
+    // Dynamically update the total cases number in the UI
+    const totalSpan = document.getElementById('total-cases');
+    if (totalSpan) totalSpan.innerText = `00${legalCases.length}`;
+    
     document.getElementById('case-title').innerText = c.title;
     document.getElementById('case-drug').innerText = `Drug: ${c.drug}`;
     document.getElementById('case-claim').innerText = `"${c.claim}"`;
@@ -133,8 +148,16 @@ function renderCase() {
     if(state.chartsInitialized) updateCharts();
 }
 
-function prevCase() { currentCaseIndex = (currentCaseIndex > 0) ? currentCaseIndex - 1 : 4; renderCase(); }
-function nextCase() { currentCaseIndex = (currentCaseIndex < 4) ? currentCaseIndex + 1 : 0; renderCase(); }
+// Updated navigation functions to scale automatically with the length of the array
+function prevCase() { 
+    currentCaseIndex = (currentCaseIndex > 0) ? currentCaseIndex - 1 : legalCases.length - 1; 
+    renderCase(); 
+}
+
+function nextCase() { 
+    currentCaseIndex = (currentCaseIndex < legalCases.length - 1) ? currentCaseIndex + 1 : 0; 
+    renderCase(); 
+}
 
 function makeRuling(isGrant) {
     const c = legalCases[currentCaseIndex];
@@ -349,31 +372,44 @@ function renderLaborGrid(days) {
     const visualCap = 2500; 
     const renderCount = Math.min(days, visualCap);
     
+    // Using DocumentFragment prevents the browser from redrawing the UI 2,500 times
+    const fragment = document.createDocumentFragment();
+    
     const medContainer = document.createElement('div');
-    medContainer.className = "flex flex-wrap gap-1 mb-6 pb-4 border-b border-gray-300";
+    medContainer.className = "flex flex-wrap gap-1 mb-6 pb-4 border-b border-gray-300 w-full";
     medContainer.innerHTML = `<div class="w-full text-xs font-bold text-gray-500 mb-1 uppercase tracking-wide">Supply: 30 Days of Medicine</div>`;
-    for(let i=0; i<30; i++) medContainer.innerHTML += `<div class="w-3 h-3 border border-gray-400 rounded-sm"></div>`;
-    container.appendChild(medContainer);
+    for(let i=0; i<30; i++) {
+        const medBlock = document.createElement('div');
+        medBlock.className = "w-3 h-3 border border-gray-400 rounded-sm";
+        medContainer.appendChild(medBlock);
+    }
+    fragment.appendChild(medContainer);
 
     const laborContainer = document.createElement('div');
-    laborContainer.className = "flex flex-wrap gap-1";
+    laborContainer.className = "flex flex-wrap gap-1 w-full";
     laborContainer.innerHTML = `<div class="w-full text-xs font-bold text-scrollRed mb-1 uppercase tracking-wide">Cost: ${days.toLocaleString()} Days of Labor</div>`;
     
-    let blockHTML = '';
-    for(let i=0; i<renderCount; i++) blockHTML += `<div class="labor-block w-3 h-3 bg-scrollRed rounded-sm shadow-sm"></div>`;
-    
-    if(days > visualCap) blockHTML += `<div class="w-full text-xs font-bold text-gray-500 mt-2 italic">... + ${(days - visualCap).toLocaleString()} more days not shown.</div>`;
-    
-    laborContainer.innerHTML += blockHTML;
-    container.appendChild(laborContainer);
-    
-    const blocks = document.querySelectorAll('.labor-block');
-    blocks.forEach((block, index) => {
-        if(index < 200) {
-            block.style.opacity = '0';
-            setTimeout(() => { block.style.opacity = '1'; }, index * 2);
+    for(let i=0; i<renderCount; i++) {
+        const block = document.createElement('div');
+        block.className = "labor-block w-3 h-3 bg-scrollRed rounded-sm shadow-sm opacity-0";
+        // Only stagger animation for the first 200 to prevent CPU spikes
+        if (i < 200) {
+            block.style.animation = `fadeInBlock 0.1s ease forwards ${i * 2}ms`;
+        } else {
+            block.style.opacity = '1';
         }
-    });
+        laborContainer.appendChild(block);
+    }
+    
+    if(days > visualCap) {
+        const overflowText = document.createElement('div');
+        overflowText.className = "w-full text-xs font-bold text-gray-500 mt-2 italic";
+        overflowText.innerText = `... + ${(days - visualCap).toLocaleString()} more days not shown.`;
+        laborContainer.appendChild(overflowText);
+    }
+    
+    fragment.appendChild(laborContainer);
+    container.appendChild(fragment);
 }
 
 function animateValue(id, start, end, duration) {
@@ -471,8 +507,132 @@ document.addEventListener("DOMContentLoaded", function() {
 
     barChart = new Chart(barCtx, { type: 'bar', data: { labels: ['Private Profit', 'Social Access'], datasets: [{ label: 'Economic Value', backgroundColor: ['#1a1a1a', '#fffb00'], data: [0, 0] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: 3500 } } } });
     lineChart = new Chart(lineCtx, { type: 'line', data: { labels: ['Yr1', 'Yr2', 'Yr3', 'Yr4', 'Yr5', 'Yr6', 'Yr7', 'Yr8', 'Yr9', 'Yr10'], datasets: [{ label: 'Price Index (%)', borderColor: '#d92525', backgroundColor: 'rgba(217, 37, 37, 0.1)', fill: true, data: [], tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 110 } } } });
-    sdChart = new Chart(sdCtx, { type: 'scatter', data: { datasets: [{ label: 'Supply (S)', borderColor: '#1d4ed8', backgroundColor: '#1d4ed8', showLine: true, fill: false, tension: 0, data: [] }, { label: 'Demand (D)', borderColor: '#15803d', backgroundColor: '#15803d', showLine: true, fill: false, tension: 0, data: [] }, { label: 'Equilibrium (E)', backgroundColor: '#d92525', pointRadius: 6, data: [] }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Quantity (Q)' }, min: 0, max: 200 }, y: { title: { display: true, text: 'Price (P)' }, min: 0, max: 150 } } } });
-    qalyChart = new Chart(qalyCtx, { type: 'bar', data: { labels: ['Patients Treated', 'Total QALYs Gained'], datasets: [{ label: 'Volume', backgroundColor: ['#fffb00', '#4ade80'], data: [0, 0] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 25000 } } } });
+    sdChart = new Chart(sdCtx, { 
+        type: 'scatter', 
+        data: { 
+            datasets: [
+                { label: 'Supply (S)', borderColor: '#1d4ed8', backgroundColor: '#1d4ed8', showLine: true, fill: false, tension: 0, data: [] }, 
+                { label: 'Demand (D)', borderColor: '#15803d', backgroundColor: '#15803d', showLine: true, fill: false, tension: 0, data: [] }, 
+                // Increased point radius so the equilibrium point is easier to hover over
+                { label: 'Equilibrium (E)', backgroundColor: '#d92525', pointRadius: 8, pointHoverRadius: 12, data: [] }
+            ] 
+        }, 
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { 
+                // Injecting the custom tooltip logic here
+                tooltip: {
+                    backgroundColor: 'rgba(26, 26, 26, 0.95)',
+                    titleFont: { size: 14, family: "'Work Sans', sans-serif" },
+                    bodyFont: { size: 12, family: "monospace" },
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        title: function(context) {
+                            if (context[0].datasetIndex === 2) return "Market Equilibrium";
+                            return context[0].dataset.label;
+                        },
+                        label: function(context) {
+                            // Only trigger the deep analysis on the Equilibrium point
+                            if (context.datasetIndex === 2) {
+                                const sShift = parseInt(document.getElementById('slider-supply-shift').value);
+                                const dShift = parseInt(document.getElementById('slider-demand-shift').value);
+                                
+                                let lines = [
+                                    `Price:    $${context.parsed.y.toFixed(2)}`,
+                                    `Quantity: ${context.parsed.x.toFixed(0)} Units`,
+                                    `-------------------------`
+                                ];
+
+                                if (sShift === 0 && dShift === 0) {
+                                    lines.push(`Status: Strict Monopoly`);
+                                    lines.push(`Analysis: High price limits access to only`);
+                                    lines.push(`those with maximum willingness to pay.`);
+                                } else {
+                                    if (sShift > 0) {
+                                        lines.push(`Supply Effect: Generic competitors entered,`);
+                                        lines.push(`driving the price down toward marginal cost.`);
+                                    }
+                                    if (dShift > 0) {
+                                        lines.push(`Demand Effect: Public procurement shifted`);
+                                        lines.push(`the curve outward, increasing total volume.`);
+                                    }
+                                }
+                                return lines;
+                            }
+                            // Default tooltip for the S and D lines
+                            return `Q: ${context.parsed.x.toFixed(0)}, P: $${context.parsed.y.toFixed(2)}`;
+                        }
+                    }
+                }
+            }, 
+            scales: { 
+                x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Quantity (Q)' }, min: 0, max: 200 }, 
+                y: { title: { display: true, text: 'Price (P)' }, min: 0, max: 150 } 
+            } 
+        } 
+    });
+    qalyChart = new Chart(qalyCtx, { 
+        type: 'bar', 
+        data: { 
+            labels: ['Patients Treated', 'Total QALYs Gained'], 
+            datasets: [{ label: 'Volume', backgroundColor: ['#fffb00', '#4ade80'], data: [0, 0] }] 
+        }, 
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(26, 26, 26, 0.95)',
+                    titleFont: { size: 14, family: "'Work Sans', sans-serif" },
+                    bodyFont: { size: 12, family: "monospace" },
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            // Fetch current state from the slider
+                            const costPerPatient = parseInt(document.getElementById('slider-qaly-cost').value);
+                            const fixedBudget = 10000000;
+                            const patients = Math.floor(fixedBudget / costPerPatient);
+                            
+                            let lines = [
+                                `Fixed Public Budget: $10,000,000`,
+                                `Drug Cost Per Patient: $${costPerPatient.toLocaleString()}`,
+                                `---------------------------------`
+                            ];
+                            
+                            if (context.dataIndex === 0) {
+                                // Tooltip logic for the "Patients Treated" bar
+                                lines.push(`Math: $10M ÷ $${costPerPatient.toLocaleString()}`);
+                                lines.push(`Result: ${patients.toLocaleString()} lives treated.`);
+                            } else {
+                                // Tooltip logic for the "Total QALYs" bar
+                                const qalys = patients * 5;
+                                lines.push(`Math: ${patients.toLocaleString()} patients × 5 added years`);
+                                lines.push(`Result: ${qalys.toLocaleString()} total years of life saved.`);
+                                lines.push(``); // Spacer
+                                
+                                // Add dynamic policy analysis based on the ICER threshold
+                                if (costPerPatient <= 5000) {
+                                    lines.push(`ICER Analysis: Highly cost-effective.`);
+                                    lines.push(`Generic pricing maximizes public health utility.`);
+                                } else {
+                                    lines.push(`ICER Analysis: Low cost-effectiveness.`);
+                                    lines.push(`Monopoly pricing actively destroys life-years.`);
+                                }
+                            }
+                            return lines;
+                        }
+                    }
+                }
+            }, 
+            scales: { 
+                y: { beginAtZero: true, max: 25000 } 
+            } 
+        } 
+    });
 
     state.chartsInitialized = true;
     

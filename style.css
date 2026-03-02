@@ -116,11 +116,14 @@ input[type=range] {
     }
 }
 
-/* Add smooth transition for the labor blocks */
-.labor-block {
-    transition: opacity 0.1s ease-in;
+/* Optimized keyframe animation for thousands of blocks */
+@keyframes fadeInBlock {
+    to { opacity: 1; }
 }
 
+.labor-block {
+    opacity: 0; /* Starts hidden, animation reveals it */
+}
 /* Custom scrollbar for the grid container to keep it neat */
 #labor-grid-container::-webkit-scrollbar {
     width: 6px;
