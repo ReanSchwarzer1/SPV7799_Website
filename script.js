@@ -164,11 +164,10 @@ function makeRuling(isGrant) {
         statusLabel.innerText = "REJECTED / CL GRANTED";
         statusLabel.className = "text-green-600 font-bold";
     }
-    
     if(state.chartsInitialized) updateCharts();
 }
 
-// --- 3, 4, 5. CHART.JS LOGIC WITH REAL ECONOMIC FORMULAS ---
+// --- 3, 4, 5. CHART.JS LOGIC ---
 let barChart, lineChart, sdChart, qalyChart;
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -180,26 +179,18 @@ document.addEventListener("DOMContentLoaded", function() {
     const sdCtx = document.getElementById('sdChart').getContext('2d');
     const qalyCtx = document.getElementById('qalyChart').getContext('2d');
 
-    // Section 3 Charts
     barChart = new Chart(barCtx, {
         type: 'bar',
-        data: {
-            labels: ['Private Profit', 'Social Access'],
-            datasets: [{ label: 'Economic Value', backgroundColor: ['#1a1a1a', '#fffb00'], data: [0, 0] }]
-        },
+        data: { labels: ['Private Profit', 'Social Access'], datasets: [{ label: 'Economic Value', backgroundColor: ['#1a1a1a', '#fffb00'], data: [0, 0] }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: 3500 } } }
     });
 
     lineChart = new Chart(lineCtx, {
         type: 'line',
-        data: {
-            labels: ['Yr1', 'Yr2', 'Yr3', 'Yr4', 'Yr5', 'Yr6', 'Yr7', 'Yr8', 'Yr9', 'Yr10'],
-            datasets: [{ label: 'Price Index (%)', borderColor: '#d92525', backgroundColor: 'rgba(217, 37, 37, 0.1)', fill: true, data: [], tension: 0.3 }]
-        },
+        data: { labels: ['Yr1', 'Yr2', 'Yr3', 'Yr4', 'Yr5', 'Yr6', 'Yr7', 'Yr8', 'Yr9', 'Yr10'], datasets: [{ label: 'Price Index (%)', borderColor: '#d92525', backgroundColor: 'rgba(217, 37, 37, 0.1)', fill: true, data: [], tension: 0.3 }] },
         options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 110 } } }
     });
 
-    // Section 4 Supply & Demand Chart
     sdChart = new Chart(sdCtx, {
         type: 'scatter',
         data: {
@@ -209,25 +200,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 { label: 'Equilibrium (E)', backgroundColor: '#d92525', pointRadius: 6, data: [] }
             ]
         },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            scales: { x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Quantity (Q)' }, min: 0, max: 200 }, y: { title: { display: true, text: 'Price (P)' }, min: 0, max: 150 } }
-        }
+        options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Quantity (Q)' }, min: 0, max: 200 }, y: { title: { display: true, text: 'Price (P)' }, min: 0, max: 150 } } }
     });
 
-    // Section 5 QALY Chart
     qalyChart = new Chart(qalyCtx, {
         type: 'bar',
-        data: {
-            labels: ['Patients Treated', 'Total QALYs Gained'],
-            datasets: [{ label: 'Volume', backgroundColor: ['#fffb00', '#4ade80'], data: [0, 0] }]
-        },
+        data: { labels: ['Patients Treated', 'Total QALYs Gained'], datasets: [{ label: 'Volume', backgroundColor: ['#fffb00', '#4ade80'], data: [0, 0] }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 25000 } } }
     });
 
     state.chartsInitialized = true;
     
-    // Listeners 
     document.getElementById('slider-comp').addEventListener('input', updateCharts);
     document.getElementById('slider-procure').addEventListener('input', updateCharts);
     document.getElementById('slider-supply-shift').addEventListener('input', updateSDChart);
@@ -296,8 +279,8 @@ function updateSDChart() {
 function updateQALYChart() {
     if(!state.chartsInitialized) return;
     const costPerPatient = parseInt(document.getElementById('slider-qaly-cost').value);
-    const fixedBudget = 10000000; // $10 Million
-    const qalyMultiplier = 5; // 5 QALYs gained per treated CML patient
+    const fixedBudget = 10000000; 
+    const qalyMultiplier = 5; 
 
     const patientsTreated = Math.floor(fixedBudget / costPerPatient);
     const totalQALYs = patientsTreated * qalyMultiplier;
@@ -309,7 +292,57 @@ function updateQALYChart() {
     qalyChart.update();
 }
 
-// --- 6. DYNAMIC MAP INTERACTIVITY ---
+// --- 6. DYNAMIC MAP INTERACTIVITY WITH REAL DATA ---
+
+// Actual historical export data (in USD Billions) sourced from IBEF / Pharmexcil
+const historicalExportData = {
+    2000: 1.5, 2001: 1.9, 2002: 2.3, 2003: 2.8, 2004: 3.5,
+    2005: 4.2, 2006: 5.0, 2007: 6.1, 2008: 7.2, 2009: 8.5,
+    2010: 9.8, 2011: 11.2, 2012: 13.0, 2013: 14.6, 2014: 15.2,
+    2015: 16.4, 2016: 16.8, 2017: 17.3, 2018: 19.1, 2019: 20.6,
+    2020: 24.4, 2021: 24.6, 2022: 25.3, 2023: 27.9, 2024: 28.5
+};
+
+// Real regional breakdown data
+const regionalData = {
+    'India': {
+        share: "100%", color: "text-brandDark", therapy: "API Synthesis & Formulation",
+        detail: "The 'Pharmacy of the World'. India accounts for 20% of global generic exports by volume, operating over 600 FDA-approved manufacturing sites (the most outside the US)."
+    },
+    'USA': {
+        share: "34%", color: "text-red-600", therapy: "Cardiovascular, CNS, Anti-Diabetic",
+        detail: "The largest single export destination. Indian manufacturers hold over 40% of the generic market share in the US, drastically lowering healthcare costs through ANDA approvals."
+    },
+    'Africa': {
+        share: "19%", color: "text-green-500", therapy: "Antiretrovirals (HIV), Antimalarials, Vaccines",
+        detail: "A lifeline for public health. Indian generics supply over 80% of all Antiretroviral (ARV) drugs used globally to combat HIV/AIDS, largely distributed via NGOs and governments across Sub-Saharan Africa."
+    },
+    'Europe': {
+        share: "16%", color: "text-yellow-600", therapy: "Complex Generics, Injectables, Oncology",
+        detail: "A highly regulated market. India is a critical supplier to the UK's NHS and various EU public health systems, stepping in specifically during supply chain shortages."
+    }
+};
+
+function selectRegion(regionKey) {
+    const data = regionalData[regionKey];
+    const panel = document.getElementById('region-info-panel');
+    
+    document.getElementById('region-title').innerText = regionKey === 'USA' ? 'North America' : regionKey;
+    
+    const shareEl = document.getElementById('region-share');
+    shareEl.innerText = data.share;
+    shareEl.className = `text-4xl font-mono font-bold ${data.color}`;
+    
+    document.getElementById('region-detail').innerText = data.detail;
+    document.getElementById('region-therapy').innerText = `Primary Focus: ${data.therapy}`;
+    
+    panel.classList.remove('hidden');
+    
+    // Hide the little bounce instruction once the user clicks a node
+    const instruct = document.getElementById('map-instruction');
+    if(instruct) instruct.style.display = 'none';
+}
+
 function updateMap() {
     const year = parseInt(document.getElementById('slider-map-year').value);
     const showAPI = document.getElementById('toggle-api').checked;
@@ -318,41 +351,35 @@ function updateMap() {
     const svg = document.getElementById('dynamic-map-lines');
     const chinaNode = document.getElementById('node-china');
     
-    // Base export volume estimation (in billions) based on Pharmexcil historical data
-    let exportVolume = 2.0; 
-    let contextText = "Mostly limited production due to global patent pressures.";
+    // Pull actual data from the dictionary
+    const exportVolume = historicalExportData[year];
+    let contextText = "Pre-2005: Market is heavily restricted by TRIPS transition period.";
     
-    if (year > 2000) exportVolume = 2.0 + ((year - 2000) * 1.0); // Rough linear scaling
-    if (year >= 2005) contextText = "2005 Patents Act amended. Generic scaling begins for Africa/EU.";
-    if (year >= 2012) contextText = "Compulsory Licensing and patent invalidations open major US/Global South markets.";
-    if (year >= 2020) contextText = "India solidifies role as 'Pharmacy of the World' during global supply shortages.";
+    if (year >= 2005) contextText = "2005 Patents Act amended. Generic scaling rapidly accelerates for Africa/EU.";
+    if (year >= 2012) contextText = "Compulsory Licensing and patent invalidations open major US and Global South markets.";
+    if (year >= 2020) contextText = "India solidifies role as 'Pharmacy of the World' during COVID-19 and global supply shortages.";
 
     document.getElementById('export-volume').innerText = `$${exportVolume.toFixed(1)} Billion`;
     document.getElementById('export-context').innerText = contextText;
 
-    // Line thickness based on volume (year)
-    const baseWidth = (year - 2000) / 4 + 1; 
+    // Line thickness scales dynamically with real export volume
+    const baseWidth = (exportVolume / 5); 
 
     let paths = '';
     
-    // India to Africa (Opens up early 2000s, booms after 2005)
-    if (year >= 2003) {
-        paths += `<path d="M 68% 45% Q 60% 60% 52% 60%" fill="none" stroke="#22c55e" stroke-width="${baseWidth}" class="flow-line opacity-80" />`;
-    }
-    // India to Europe (Steady growth)
-    if (year >= 2005) {
-        paths += `<path d="M 68% 45% Q 60% 30% 50% 30%" fill="none" stroke="#fffb00" stroke-width="${baseWidth * 0.8}" class="flow-line opacity-80" />`;
-    }
-    // India to US (Massive boom post-2010 patent cliffs)
-    if (year >= 2010) {
-        paths += `<path d="M 68% 45% Q 45% 20% 22% 35%" fill="none" stroke="#d92525" stroke-width="${baseWidth * 1.2}" class="flow-line opacity-80" />`;
-    }
+    // India to Africa (Greens)
+    if (year >= 2001) paths += `<path d="M 68% 45% Q 60% 60% 52% 60%" fill="none" stroke="#22c55e" stroke-width="${baseWidth}" class="flow-line opacity-80" />`;
+    
+    // India to Europe (Yellows)
+    if (year >= 2003) paths += `<path d="M 68% 45% Q 60% 30% 50% 30%" fill="none" stroke="#eab308" stroke-width="${baseWidth * 0.8}" class="flow-line opacity-80" />`;
+    
+    // India to US (Reds)
+    if (year >= 2006) paths += `<path d="M 68% 45% Q 45% 20% 22% 35%" fill="none" stroke="#dc2626" stroke-width="${baseWidth * 1.3}" class="flow-line opacity-80" />`;
 
     // API Toggle (China to India)
     if (showAPI) {
         chinaNode.classList.remove('hidden');
-        // Red dependency line flowing backwards into India
-        paths += `<path d="M 75% 40% Q 72% 42% 68% 45%" fill="none" stroke="#d92525" stroke-width="4" stroke-dasharray="10" class="flow-line-reverse opacity-90" />`;
+        paths += `<path d="M 75% 40% Q 72% 42% 68% 45%" fill="none" stroke="#991b1b" stroke-width="4" stroke-dasharray="10" class="flow-line-reverse opacity-90" />`;
     } else {
         chinaNode.classList.add('hidden');
     }
