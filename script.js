@@ -184,7 +184,6 @@ function updateCharts() {
     const demandMultiplier = 1 + (state.procurement * 0.5); 
     let quantity = (maxWillingPrice - currentPrice) * demandMultiplier;
 
-    // Fixed Bug: Ensured producer surplus doesn't drop below 0 if parameters are pushed to extremes
     let producerSurplus = Math.max(0, (currentPrice - marginalCost) * quantity);
     let consumerSurplus = Math.max(0, 0.5 * (maxWillingPrice - currentPrice) * quantity);
 
@@ -373,7 +372,6 @@ function renderLaborGrid(days) {
     });
 }
 
-// Fixed Bug: Storing animation frame ID prevents numbers jittering on fast clicks
 function animateValue(id, start, end, duration) {
     const obj = document.getElementById(id);
     if (!obj) return;
@@ -392,59 +390,17 @@ function animateValue(id, start, end, duration) {
     obj.animationId = window.requestAnimationFrame(step);
 }
 
-// --- GLOBAL INITIALIZATION (Merged for Clean Execution) ---
-document.addEventListener("DOMContentLoaded", function() {
-    initWebGLViewer();
-    renderCase();
-
-    const barCtx = document.getElementById('barChart').getContext('2d');
-    const lineCtx = document.getElementById('lineChart').getContext('2d');
-    const sdCtx = document.getElementById('sdChart').getContext('2d');
-    const qalyCtx = document.getElementById('qalyChart').getContext('2d');
-
-    barChart = new Chart(barCtx, { type: 'bar', data: { labels: ['Private Profit', 'Social Access'], datasets: [{ label: 'Economic Value', backgroundColor: ['#1a1a1a', '#fffb00'], data: [0, 0] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: 3500 } } } });
-    lineChart = new Chart(lineCtx, { type: 'line', data: { labels: ['Yr1', 'Yr2', 'Yr3', 'Yr4', 'Yr5', 'Yr6', 'Yr7', 'Yr8', 'Yr9', 'Yr10'], datasets: [{ label: 'Price Index (%)', borderColor: '#d92525', backgroundColor: 'rgba(217, 37, 37, 0.1)', fill: true, data: [], tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 110 } } } });
-    sdChart = new Chart(sdCtx, { type: 'scatter', data: { datasets: [{ label: 'Supply (S)', borderColor: '#1d4ed8', backgroundColor: '#1d4ed8', showLine: true, fill: false, tension: 0, data: [] }, { label: 'Demand (D)', borderColor: '#15803d', backgroundColor: '#15803d', showLine: true, fill: false, tension: 0, data: [] }, { label: 'Equilibrium (E)', backgroundColor: '#d92525', pointRadius: 6, data: [] }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Quantity (Q)' }, min: 0, max: 200 }, y: { title: { display: true, text: 'Price (P)' }, min: 0, max: 150 } } } });
-    qalyChart = new Chart(qalyCtx, { type: 'bar', data: { labels: ['Patients Treated', 'Total QALYs Gained'], datasets: [{ label: 'Volume', backgroundColor: ['#fffb00', '#4ade80'], data: [0, 0] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 25000 } } } });
-
-    state.chartsInitialized = true;
-    
-    document.getElementById('slider-comp').addEventListener('input', updateCharts);
-    document.getElementById('slider-procure').addEventListener('input', updateCharts);
-    document.getElementById('slider-supply-shift').addEventListener('input', updateSDChart);
-    document.getElementById('slider-demand-shift').addEventListener('input', updateSDChart);
-    document.getElementById('slider-qaly-cost').addEventListener('input', updateQALYChart);
-    document.getElementById('slider-map-year').addEventListener('input', updateMap);
-    document.getElementById('toggle-api').addEventListener('change', updateMap);
-    
-    // New Event Listeners from Section 7
-    document.getElementById('select-market-state').addEventListener('change', updateAffordabilityWidget);
-    document.getElementById('select-wage-profile').addEventListener('change', updateAffordabilityWidget);
-    
-    updateCharts();
-    updateSDChart();
-    updateQALYChart();
-    updateMap();
-    updateAffordabilityWidget();
-});
-
 // --- 8. ANTITRUST & MARKET CONCENTRATION (HHI) ---
-
 function updateHHIWidget() {
     const numFirms = parseInt(document.getElementById('slider-hhi-firms').value);
     
-    // Simulate market share logic: 
-    // If 1 firm, it has 100%. 
-    // If N firms, the original patent holder retains a dominant premium (e.g., 40%), and generics split the rest.
     let shares = [];
     if (numFirms === 1) {
         shares.push(100);
     } else {
-        // Originator keeps a decaying premium share, minimum 20%
         const originatorShare = Math.max(20, 100 - (numFirms * 8)); 
         shares.push(originatorShare);
         
-        // Generics evenly split the remaining market
         const remainingShare = 100 - originatorShare;
         const genericShare = remainingShare / (numFirms - 1);
         for(let i=0; i < numFirms - 1; i++) {
@@ -452,14 +408,12 @@ function updateHHIWidget() {
         }
     }
     
-    // Calculate HHI
     let hhi = 0;
     shares.forEach(s => {
         hhi += Math.pow(s, 2);
     });
     hhi = Math.round(hhi);
     
-    // Update Score UI
     const scoreVal = document.getElementById('hhi-score-val');
     const badge = document.getElementById('hhi-status-badge');
     
@@ -479,7 +433,6 @@ function updateHHIWidget() {
         badge.className = "text-sm font-bold tracking-widest uppercase py-1 px-3 rounded inline-block mt-2 bg-green-900 text-green-200 border border-green-500";
     }
     
-    // Render the visual share blocks
     renderHHIBlocks(shares);
 }
 
@@ -489,12 +442,11 @@ function renderHHIBlocks(shares) {
     
     shares.forEach((share, index) => {
         const block = document.createElement('div');
-        // Visual area is relative to the share. We use flex-basis to approximate area division.
         block.style.width = `${share}%`;
         block.style.height = '100%';
         block.className = `flex flex-col justify-center items-center border-r border-white transition-all duration-500 overflow-hidden ${index === 0 ? 'bg-brandDark text-white' : 'bg-gray-300 text-brandDark'}`;
         
-        if (share > 5) { // Only show text if the block is wide enough
+        if (share > 5) {
             block.innerHTML = `<span class="font-bold text-lg">${Math.round(share)}%</span>
                                <span class="text-[10px] uppercase font-mono tracking-tighter opacity-70">${index === 0 ? 'Originator' : 'Generic'}</span>`;
         }
@@ -503,10 +455,40 @@ function renderHHIBlocks(shares) {
     });
 }
 
-// Add this to your existing DOMContentLoaded block in script.js
+// --- GLOBAL INITIALIZATION (Merged Single Block) ---
 document.addEventListener("DOMContentLoaded", function() {
-    // ... existing initializations ...
+    initWebGLViewer();
+    renderCase();
+
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    const sdCtx = document.getElementById('sdChart').getContext('2d');
+    const qalyCtx = document.getElementById('qalyChart').getContext('2d');
+
+    barChart = new Chart(barCtx, { type: 'bar', data: { labels: ['Private Profit', 'Social Access'], datasets: [{ label: 'Economic Value', backgroundColor: ['#1a1a1a', '#fffb00'], data: [0, 0] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: 3500 } } } });
+    lineChart = new Chart(lineCtx, { type: 'line', data: { labels: ['Yr1', 'Yr2', 'Yr3', 'Yr4', 'Yr5', 'Yr6', 'Yr7', 'Yr8', 'Yr9', 'Yr10'], datasets: [{ label: 'Price Index (%)', borderColor: '#d92525', backgroundColor: 'rgba(217, 37, 37, 0.1)', fill: true, data: [], tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 110 } } } });
+    sdChart = new Chart(sdCtx, { type: 'scatter', data: { datasets: [{ label: 'Supply (S)', borderColor: '#1d4ed8', backgroundColor: '#1d4ed8', showLine: true, fill: false, tension: 0, data: [] }, { label: 'Demand (D)', borderColor: '#15803d', backgroundColor: '#15803d', showLine: true, fill: false, tension: 0, data: [] }, { label: 'Equilibrium (E)', backgroundColor: '#d92525', pointRadius: 6, data: [] }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Quantity (Q)' }, min: 0, max: 200 }, y: { title: { display: true, text: 'Price (P)' }, min: 0, max: 150 } } } });
+    qalyChart = new Chart(qalyCtx, { type: 'bar', data: { labels: ['Patients Treated', 'Total QALYs Gained'], datasets: [{ label: 'Volume', backgroundColor: ['#fffb00', '#4ade80'], data: [0, 0] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 25000 } } } });
+
+    state.chartsInitialized = true;
     
+    // Bind all event listeners
+    document.getElementById('slider-comp').addEventListener('input', updateCharts);
+    document.getElementById('slider-procure').addEventListener('input', updateCharts);
+    document.getElementById('slider-supply-shift').addEventListener('input', updateSDChart);
+    document.getElementById('slider-demand-shift').addEventListener('input', updateSDChart);
+    document.getElementById('slider-qaly-cost').addEventListener('input', updateQALYChart);
+    document.getElementById('slider-map-year').addEventListener('input', updateMap);
+    document.getElementById('toggle-api').addEventListener('change', updateMap);
+    document.getElementById('select-market-state').addEventListener('change', updateAffordabilityWidget);
+    document.getElementById('select-wage-profile').addEventListener('change', updateAffordabilityWidget);
     document.getElementById('slider-hhi-firms').addEventListener('input', updateHHIWidget);
-    updateHHIWidget(); // Initialize it on load
+    
+    // Initialize all widgets
+    updateCharts();
+    updateSDChart();
+    updateQALYChart();
+    updateMap();
+    updateAffordabilityWidget();
+    updateHHIWidget();
 });
