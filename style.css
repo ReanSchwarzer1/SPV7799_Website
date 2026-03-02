@@ -74,3 +74,20 @@ input[type=range] {
     height: 100%;
     width: 100%;
 }
+
+/* Dynamic Legal Citation Footnote Styling */
+#case-citation {
+    position: relative;
+    padding-left: 28px !important; 
+    transition: opacity 0.3s ease-in-out;
+}
+
+#case-citation::before {
+    content: '↳';
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    color: #6b7280; 
+    font-weight: bold;
+    font-size: 1.1em;
+}
