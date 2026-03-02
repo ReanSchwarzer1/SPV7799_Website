@@ -91,3 +91,27 @@ input[type=range] {
     font-weight: bold;
     font-size: 1.1em;
 }
+
+/* Add to bottom of your existing style.css */
+
+/* Map Flow Animations */
+.flow-line {
+    stroke-dasharray: 10, 10;
+    animation: dash-flow 20s linear infinite;
+}
+
+.flow-line-reverse {
+    animation: dash-flow-reverse 5s linear infinite;
+}
+
+@keyframes dash-flow {
+    to {
+        stroke-dashoffset: -1000;
+    }
+}
+
+@keyframes dash-flow-reverse {
+    to {
+        stroke-dashoffset: 100;
+    }
+}

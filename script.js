@@ -53,7 +53,7 @@ function setSynthesis(route) {
     if(state.chartsInitialized) updateCharts();
 }
 
-// --- 2. LEGAL LABYRINTH (Real 5 Cases) ---
+// --- 2. LEGAL LABYRINTH ---
 const legalCases = [
     {
         title: "Novartis AG vs. Union of India",
@@ -168,8 +168,8 @@ function makeRuling(isGrant) {
     if(state.chartsInitialized) updateCharts();
 }
 
-// --- 3. CHART.JS LOGIC WITH REAL ECONOMIC FORMULAS ---
-let barChart, lineChart, sdChart;
+// --- 3, 4, 5. CHART.JS LOGIC WITH REAL ECONOMIC FORMULAS ---
+let barChart, lineChart, sdChart, qalyChart;
 
 document.addEventListener("DOMContentLoaded", function() {
     initWebGLViewer();
@@ -178,6 +178,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const barCtx = document.getElementById('barChart').getContext('2d');
     const lineCtx = document.getElementById('lineChart').getContext('2d');
     const sdCtx = document.getElementById('sdChart').getContext('2d');
+    const qalyCtx = document.getElementById('qalyChart').getContext('2d');
 
     // Section 3 Charts
     barChart = new Chart(barCtx, {
@@ -198,83 +199,65 @@ document.addEventListener("DOMContentLoaded", function() {
         options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 110 } } }
     });
 
-    // Section 4 Supply & Demand Chart (Scatter Plot used to draw explicit crossing lines)
+    // Section 4 Supply & Demand Chart
     sdChart = new Chart(sdCtx, {
         type: 'scatter',
         data: {
             datasets: [
-                {
-                    label: 'Supply (S)',
-                    borderColor: '#1d4ed8', // blue-700
-                    backgroundColor: '#1d4ed8',
-                    showLine: true,
-                    fill: false,
-                    tension: 0,
-                    data: []
-                },
-                {
-                    label: 'Demand (D)',
-                    borderColor: '#15803d', // green-700
-                    backgroundColor: '#15803d',
-                    showLine: true,
-                    fill: false,
-                    tension: 0,
-                    data: []
-                },
-                {
-                    label: 'Equilibrium (E)',
-                    backgroundColor: '#d92525', // red
-                    pointRadius: 6,
-                    data: []
-                }
+                { label: 'Supply (S)', borderColor: '#1d4ed8', backgroundColor: '#1d4ed8', showLine: true, fill: false, tension: 0, data: [] },
+                { label: 'Demand (D)', borderColor: '#15803d', backgroundColor: '#15803d', showLine: true, fill: false, tension: 0, data: [] },
+                { label: 'Equilibrium (E)', backgroundColor: '#d92525', pointRadius: 6, data: [] }
             ]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Quantity (Q)' }, min: 0, max: 200 },
-                y: { title: { display: true, text: 'Price (P)' }, min: 0, max: 150 }
-            }
+            responsive: true, maintainAspectRatio: false,
+            scales: { x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Quantity (Q)' }, min: 0, max: 200 }, y: { title: { display: true, text: 'Price (P)' }, min: 0, max: 150 } }
         }
+    });
+
+    // Section 5 QALY Chart
+    qalyChart = new Chart(qalyCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Patients Treated', 'Total QALYs Gained'],
+            datasets: [{ label: 'Volume', backgroundColor: ['#fffb00', '#4ade80'], data: [0, 0] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 25000 } } }
     });
 
     state.chartsInitialized = true;
     
-    // Listeners for Sec 3
+    // Listeners 
     document.getElementById('slider-comp').addEventListener('input', updateCharts);
     document.getElementById('slider-procure').addEventListener('input', updateCharts);
-
-    // Listeners for Sec 4
     document.getElementById('slider-supply-shift').addEventListener('input', updateSDChart);
     document.getElementById('slider-demand-shift').addEventListener('input', updateSDChart);
+    document.getElementById('slider-qaly-cost').addEventListener('input', updateQALYChart);
+    document.getElementById('slider-map-year').addEventListener('input', updateMap);
+    document.getElementById('toggle-api').addEventListener('change', updateMap);
     
     updateCharts();
     updateSDChart();
-    drawMapLines();
+    updateQALYChart();
+    updateMap();
 });
 
 function updateCharts() {
     if(!state.chartsInitialized) return;
-
     state.competitors = parseInt(document.getElementById('slider-comp').value);
     state.procurement = parseInt(document.getElementById('slider-procure').value);
-
     document.getElementById('val-comp').innerText = state.competitors;
     document.getElementById('val-procure').innerText = state.procurement === 1 ? 'Low' : (state.procurement === 2 ? 'Medium' : 'High');
 
     const basePrice = 100; 
     let currentPrice = state.patentActive ? basePrice : basePrice * Math.pow(state.competitors, -0.75);
-
     const maxWillingPrice = 120;
     const marginalCost = 5; 
     const demandMultiplier = 1 + (state.procurement * 0.5); 
-    
     let quantity = (maxWillingPrice - currentPrice) * demandMultiplier;
 
     let producerSurplus = (currentPrice - marginalCost) * quantity;
     if (producerSurplus < 0) producerSurplus = 0;
-
     let consumerSurplus = 0.5 * (maxWillingPrice - currentPrice) * quantity;
 
     barChart.data.datasets[0].data = [Math.round(producerSurplus), Math.round(consumerSurplus)];
@@ -282,15 +265,12 @@ function updateCharts() {
 
     let priceData = [];
     for (let year = 1; year <= 10; year++) {
-        if (state.patentActive) {
-            priceData.push(basePrice); 
-        } else {
+        if (state.patentActive) priceData.push(basePrice); 
+        else {
             let activeCompetitorsInYear = 1 + ((state.competitors - 1) * (year / 10));
-            let projectedPrice = basePrice * Math.pow(activeCompetitorsInYear, -0.75);
-            priceData.push(projectedPrice.toFixed(2));
+            priceData.push((basePrice * Math.pow(activeCompetitorsInYear, -0.75)).toFixed(2));
         }
     }
-    
     lineChart.data.datasets[0].data = priceData;
     lineChart.data.datasets[0].borderColor = state.patentActive ? '#d92525' : '#22c55e';
     lineChart.data.datasets[0].backgroundColor = state.patentActive ? 'rgba(217, 37, 37, 0.1)' : 'rgba(34, 197, 94, 0.1)';
@@ -299,62 +279,83 @@ function updateCharts() {
 
 function updateSDChart() {
     if(!state.chartsInitialized) return;
-
-    // Linear Economics Math
-    // D: P = (120 + demandShift) - 0.5Q
-    // S: P = (80 - supplyShift) + 0.5Q
-
     const sShift = parseInt(document.getElementById('slider-supply-shift').value);
     const dShift = parseInt(document.getElementById('slider-demand-shift').value);
+    const a = 120 + dShift; const b = 0.5; const c = 80 - sShift; const d = 0.5; 
+    const eqQ = (a - c) / (b + d); const eqP = a - (b * eqQ);
 
-    // Calculate intercepts
-    const a = 120 + dShift; // Demand Y-intercept
-    const b = 0.5;          // Demand slope
-    const c = 80 - sShift;  // Supply Y-intercept
-    const d = 0.5;          // Supply slope
-
-    // Calculate Equilibrium where D = S
-    // a - bQ = c + dQ => Q = (a - c) / (b + d)
-    const eqQ = (a - c) / (b + d);
-    const eqP = a - (b * eqQ);
-
-    // Build data points for lines (from Q=0 to Q=200)
-    const supplyData = [
-        { x: 0, y: c },
-        { x: 200, y: c + (d * 200) }
-    ];
-
-    const demandData = [
-        { x: 0, y: a },
-        { x: 200, y: a - (b * 200) }
-    ];
-
-    // Update Chart.js
-    sdChart.data.datasets[0].data = supplyData;
-    sdChart.data.datasets[1].data = demandData;
-    sdChart.data.datasets[2].data = [{ x: eqQ, y: eqP }]; // The red equilibrium dot
+    sdChart.data.datasets[0].data = [{ x: 0, y: c }, { x: 200, y: c + (d * 200) }];
+    sdChart.data.datasets[1].data = [{ x: 0, y: a }, { x: 200, y: a - (b * 200) }];
+    sdChart.data.datasets[2].data = [{ x: eqQ, y: eqP }]; 
     sdChart.update();
 
-    // Update UI text
     document.getElementById('eq-price').innerText = `$${eqP.toFixed(2)}`;
     document.getElementById('eq-quantity').innerText = `${eqQ.toFixed(0)} Units`;
 }
 
-// --- 5. MAP INTERACTIVITY ---
-function toggleHotspot(id) {
-    document.querySelectorAll('.hotspot-content').forEach(el => {
-        el.style.display = 'none';
-        el.previousElementSibling.classList.remove('active');
-    });
-    const target = document.getElementById(id);
-    target.style.display = 'block';
-    target.previousElementSibling.classList.add('active');
+function updateQALYChart() {
+    if(!state.chartsInitialized) return;
+    const costPerPatient = parseInt(document.getElementById('slider-qaly-cost').value);
+    const fixedBudget = 10000000; // $10 Million
+    const qalyMultiplier = 5; // 5 QALYs gained per treated CML patient
+
+    const patientsTreated = Math.floor(fixedBudget / costPerPatient);
+    const totalQALYs = patientsTreated * qalyMultiplier;
+
+    document.getElementById('qaly-patients').innerText = patientsTreated.toLocaleString();
+    document.getElementById('qaly-total').innerText = totalQALYs.toLocaleString();
+
+    qalyChart.data.datasets[0].data = [patientsTreated, totalQALYs];
+    qalyChart.update();
 }
 
-function drawMapLines() {
-    const svg = document.getElementById('map-lines');
-    svg.innerHTML = `
-        <path d="M 22% 35% Q 45% 20% 68% 45%" fill="none" stroke="#fffb00" stroke-width="2" stroke-dasharray="5,5" class="opacity-70" />
-        <path d="M 68% 45% Q 60% 60% 52% 60%" fill="none" stroke="#fffb00" stroke-width="2" stroke-dasharray="5,5" class="opacity-70" />
-    `;
+// --- 6. DYNAMIC MAP INTERACTIVITY ---
+function updateMap() {
+    const year = parseInt(document.getElementById('slider-map-year').value);
+    const showAPI = document.getElementById('toggle-api').checked;
+    document.getElementById('map-year-display').innerText = year;
+
+    const svg = document.getElementById('dynamic-map-lines');
+    const chinaNode = document.getElementById('node-china');
+    
+    // Base export volume estimation (in billions) based on Pharmexcil historical data
+    let exportVolume = 2.0; 
+    let contextText = "Mostly limited production due to global patent pressures.";
+    
+    if (year > 2000) exportVolume = 2.0 + ((year - 2000) * 1.0); // Rough linear scaling
+    if (year >= 2005) contextText = "2005 Patents Act amended. Generic scaling begins for Africa/EU.";
+    if (year >= 2012) contextText = "Compulsory Licensing and patent invalidations open major US/Global South markets.";
+    if (year >= 2020) contextText = "India solidifies role as 'Pharmacy of the World' during global supply shortages.";
+
+    document.getElementById('export-volume').innerText = `$${exportVolume.toFixed(1)} Billion`;
+    document.getElementById('export-context').innerText = contextText;
+
+    // Line thickness based on volume (year)
+    const baseWidth = (year - 2000) / 4 + 1; 
+
+    let paths = '';
+    
+    // India to Africa (Opens up early 2000s, booms after 2005)
+    if (year >= 2003) {
+        paths += `<path d="M 68% 45% Q 60% 60% 52% 60%" fill="none" stroke="#22c55e" stroke-width="${baseWidth}" class="flow-line opacity-80" />`;
+    }
+    // India to Europe (Steady growth)
+    if (year >= 2005) {
+        paths += `<path d="M 68% 45% Q 60% 30% 50% 30%" fill="none" stroke="#fffb00" stroke-width="${baseWidth * 0.8}" class="flow-line opacity-80" />`;
+    }
+    // India to US (Massive boom post-2010 patent cliffs)
+    if (year >= 2010) {
+        paths += `<path d="M 68% 45% Q 45% 20% 22% 35%" fill="none" stroke="#d92525" stroke-width="${baseWidth * 1.2}" class="flow-line opacity-80" />`;
+    }
+
+    // API Toggle (China to India)
+    if (showAPI) {
+        chinaNode.classList.remove('hidden');
+        // Red dependency line flowing backwards into India
+        paths += `<path d="M 75% 40% Q 72% 42% 68% 45%" fill="none" stroke="#d92525" stroke-width="4" stroke-dasharray="10" class="flow-line-reverse opacity-90" />`;
+    } else {
+        chinaNode.classList.add('hidden');
+    }
+
+    svg.innerHTML = paths;
 }
