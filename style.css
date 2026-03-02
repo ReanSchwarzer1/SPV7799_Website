@@ -92,8 +92,6 @@ input[type=range] {
     font-size: 1.1em;
 }
 
-/* Add to bottom of your existing style.css */
-
 /* Map Flow Animations */
 .flow-line {
     stroke-dasharray: 10, 10;
@@ -122,8 +120,9 @@ input[type=range] {
 }
 
 .labor-block {
-    opacity: 0; /* Starts hidden, animation reveals it */
+    opacity: 0; 
 }
+
 /* Custom scrollbar for the grid container to keep it neat */
 #labor-grid-container::-webkit-scrollbar {
     width: 6px;

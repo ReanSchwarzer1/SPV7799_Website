@@ -28,24 +28,45 @@ function setSynthesis(route) {
     const btnPat = document.getElementById('btn-patented');
     const btnAlt = document.getElementById('btn-alternative');
     const cost = document.getElementById('api-cost');
+    
+    // UI Connections for cross-section syncing
+    const compSlider = document.getElementById('slider-comp');
+    const compNote = document.getElementById('comp-note');
+    const statusLabel = document.getElementById('val-monopoly-status');
 
     btnPat.classList.remove('border-brandDark', 'bg-white');
     btnAlt.classList.remove('border-brandDark', 'bg-white');
+    btnPat.classList.add('border-transparent');
+    btnAlt.classList.add('border-transparent');
     
     if(route === 'patented') {
+        btnPat.classList.remove('border-transparent');
         btnPat.classList.add('border-brandDark', 'bg-white');
         cost.innerText = "$750.00"; 
         cost.className = "text-5xl font-bold text-scrollRed font-mono transition-colors duration-300";
-        state.patentActive = true; // explicitly link to chart logic
+        state.patentActive = true; 
+        
+        // BUG FIX: Sync visual UI in Section 3
+        if (compSlider) { compSlider.disabled = true; compSlider.value = 1; }
+        if (compNote) { compNote.innerText = "Locked by Patent."; compNote.className = "text-xs text-red-500 mt-1 font-bold"; }
+        if (statusLabel) { statusLabel.innerText = "ACTIVE"; statusLabel.className = "text-red-600 font-bold"; }
+        
         if(glViewer) {
             glViewer.setStyle({}, {stick: {radius: 0.15, colorscheme: 'redCarbon'}});
             glViewer.render();
         }
     } else {
+        btnAlt.classList.remove('border-transparent');
         btnAlt.classList.add('border-brandDark', 'bg-white');
         cost.innerText = "$0.10"; 
         cost.className = "text-5xl font-bold text-green-500 font-mono transition-colors duration-300";
-        state.patentActive = false; // explicitly link to chart logic
+        state.patentActive = false; 
+        
+        // BUG FIX: Sync visual UI in Section 3
+        if (compSlider) { compSlider.disabled = false; compSlider.value = 15; }
+        if (compNote) { compNote.innerText = "Market open! Adjust competitors."; compNote.className = "text-xs text-green-600 mt-1 font-bold"; }
+        if (statusLabel) { statusLabel.innerText = "REJECTED / CL GRANTED"; statusLabel.className = "text-green-600 font-bold"; }
+        
         if(glViewer) {
             glViewer.setStyle({}, {
                 stick: {radius: 0.1, colorscheme: 'greenCarbon'}, 
@@ -132,7 +153,6 @@ let currentCaseIndex = 0;
 function renderCase() {
     const c = legalCases[currentCaseIndex];
     document.getElementById('case-number').innerText = `00${currentCaseIndex + 1}`;
-    // Dynamically update the total cases number in the UI
     const totalSpan = document.getElementById('total-cases');
     if (totalSpan) totalSpan.innerText = `00${legalCases.length}`;
     
@@ -145,10 +165,28 @@ function renderCase() {
     
     document.getElementById('ruling-outcome').classList.add('hidden');
     state.patentActive = true; 
+    
+    // BUG FIX: Reset sliders to Patented Monopoly state for new cases
+    const compSlider = document.getElementById('slider-comp');
+    const compNote = document.getElementById('comp-note');
+    const statusLabel = document.getElementById('val-monopoly-status');
+
+    if (compSlider) {
+        compSlider.disabled = true;
+        compSlider.value = 1;
+    }
+    if (compNote) {
+        compNote.innerText = "Locked by Patent.";
+        compNote.className = "text-xs text-red-500 mt-1 font-bold";
+    }
+    if (statusLabel) {
+        statusLabel.innerText = "ACTIVE";
+        statusLabel.className = "text-red-600 font-bold";
+    }
+    
     if(state.chartsInitialized) updateCharts();
 }
 
-// Updated navigation functions to scale automatically with the length of the array
 function prevCase() { 
     currentCaseIndex = (currentCaseIndex > 0) ? currentCaseIndex - 1 : legalCases.length - 1; 
     renderCase(); 
@@ -194,7 +232,7 @@ function makeRuling(isGrant) {
     if(state.chartsInitialized) updateCharts();
 }
 
-// --- 3, 4, 5. CHART.JS LOGIC ---
+// --- 3, 4, 5. CHART.JS LOGIC WITH ARIA INJECTION ---
 let barChart, lineChart, sdChart, qalyChart;
 
 function updateCharts() {
@@ -216,6 +254,9 @@ function updateCharts() {
 
     barChart.data.datasets[0].data = [Math.round(producerSurplus), Math.round(consumerSurplus)];
     barChart.update();
+    
+    // ARIA Dynamic Injection
+    document.getElementById('barChart').setAttribute('aria-label', `Value Distribution Chart. Producer Surplus is $${Math.round(producerSurplus).toLocaleString()}, and Consumer Surplus is $${Math.round(consumerSurplus).toLocaleString()}.`);
 
     let priceData = [];
     for (let year = 1; year <= 10; year++) {
@@ -229,6 +270,9 @@ function updateCharts() {
     lineChart.data.datasets[0].borderColor = state.patentActive ? '#d92525' : '#22c55e';
     lineChart.data.datasets[0].backgroundColor = state.patentActive ? 'rgba(217, 37, 37, 0.1)' : 'rgba(34, 197, 94, 0.1)';
     lineChart.update();
+    
+    // ARIA Dynamic Injection
+    document.getElementById('lineChart').setAttribute('aria-label', `Price Decay Chart over 10 years. Current Patent Status is ${state.patentActive ? 'Active Monopoly' : 'Rejected, allowing generic competition'}.`);
 }
 
 function updateSDChart() {
@@ -245,6 +289,10 @@ function updateSDChart() {
 
     document.getElementById('eq-price').innerText = `$${eqP.toFixed(2)}`;
     document.getElementById('eq-quantity').innerText = `${eqQ.toFixed(0)} Units`;
+    
+    // ARIA Dynamic Injection
+    let economicAnalysis = (sShift === 0 && dShift === 0) ? "Market is in strict monopoly restricting access." : "Market shifted due to competitive supply or public demand.";
+    document.getElementById('sdChart').setAttribute('aria-label', `Supply and Demand Chart. Current Equilibrium Price is $${eqP.toFixed(2)} and Quantity is ${eqQ.toFixed(0)} units. ${economicAnalysis}`);
 }
 
 function updateQALYChart() {
@@ -261,6 +309,10 @@ function updateQALYChart() {
 
     qalyChart.data.datasets[0].data = [patientsTreated, totalQALYs];
     qalyChart.update();
+    
+    // ARIA Dynamic Injection
+    let icerAnalysis = costPerPatient <= 5000 ? "This generic pricing is highly cost-effective." : "This monopoly pricing destroys life-years and is not cost-effective.";
+    document.getElementById('qalyChart').setAttribute('aria-label', `Quality Adjusted Life Years Bar Chart. At a drug cost of $${costPerPatient.toLocaleString()} per patient, the $10 Million budget treats ${patientsTreated.toLocaleString()} patients, yielding ${totalQALYs.toLocaleString()} total QALYs gained. ${icerAnalysis}`);
 }
 
 // --- 6. DYNAMIC MAP INTERACTIVITY WITH REAL DATA ---
@@ -372,7 +424,6 @@ function renderLaborGrid(days) {
     const visualCap = 2500; 
     const renderCount = Math.min(days, visualCap);
     
-    // Using DocumentFragment prevents the browser from redrawing the UI 2,500 times
     const fragment = document.createDocumentFragment();
     
     const medContainer = document.createElement('div');
@@ -392,7 +443,6 @@ function renderLaborGrid(days) {
     for(let i=0; i<renderCount; i++) {
         const block = document.createElement('div');
         block.className = "labor-block w-3 h-3 bg-scrollRed rounded-sm shadow-sm opacity-0";
-        // Only stagger animation for the first 200 to prevent CPU spikes
         if (i < 200) {
             block.style.animation = `fadeInBlock 0.1s ease forwards ${i * 2}ms`;
         } else {
@@ -513,7 +563,6 @@ document.addEventListener("DOMContentLoaded", function() {
             datasets: [
                 { label: 'Supply (S)', borderColor: '#1d4ed8', backgroundColor: '#1d4ed8', showLine: true, fill: false, tension: 0, data: [] }, 
                 { label: 'Demand (D)', borderColor: '#15803d', backgroundColor: '#15803d', showLine: true, fill: false, tension: 0, data: [] }, 
-                // Increased point radius so the equilibrium point is easier to hover over
                 { label: 'Equilibrium (E)', backgroundColor: '#d92525', pointRadius: 8, pointHoverRadius: 12, data: [] }
             ] 
         }, 
@@ -521,7 +570,6 @@ document.addEventListener("DOMContentLoaded", function() {
             responsive: true, 
             maintainAspectRatio: false, 
             plugins: { 
-                // Injecting the custom tooltip logic here
                 tooltip: {
                     backgroundColor: 'rgba(26, 26, 26, 0.95)',
                     titleFont: { size: 14, family: "'Work Sans', sans-serif" },
@@ -534,7 +582,6 @@ document.addEventListener("DOMContentLoaded", function() {
                             return context[0].dataset.label;
                         },
                         label: function(context) {
-                            // Only trigger the deep analysis on the Equilibrium point
                             if (context.datasetIndex === 2) {
                                 const sShift = parseInt(document.getElementById('slider-supply-shift').value);
                                 const dShift = parseInt(document.getElementById('slider-demand-shift').value);
@@ -561,7 +608,6 @@ document.addEventListener("DOMContentLoaded", function() {
                                 }
                                 return lines;
                             }
-                            // Default tooltip for the S and D lines
                             return `Q: ${context.parsed.x.toFixed(0)}, P: $${context.parsed.y.toFixed(2)}`;
                         }
                     }
@@ -592,7 +638,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     displayColors: false,
                     callbacks: {
                         label: function(context) {
-                            // Fetch current state from the slider
                             const costPerPatient = parseInt(document.getElementById('slider-qaly-cost').value);
                             const fixedBudget = 10000000;
                             const patients = Math.floor(fixedBudget / costPerPatient);
@@ -604,17 +649,14 @@ document.addEventListener("DOMContentLoaded", function() {
                             ];
                             
                             if (context.dataIndex === 0) {
-                                // Tooltip logic for the "Patients Treated" bar
                                 lines.push(`Math: $10M ÷ $${costPerPatient.toLocaleString()}`);
                                 lines.push(`Result: ${patients.toLocaleString()} lives treated.`);
                             } else {
-                                // Tooltip logic for the "Total QALYs" bar
                                 const qalys = patients * 5;
                                 lines.push(`Math: ${patients.toLocaleString()} patients × 5 added years`);
                                 lines.push(`Result: ${qalys.toLocaleString()} total years of life saved.`);
-                                lines.push(``); // Spacer
+                                lines.push(``); 
                                 
-                                // Add dynamic policy analysis based on the ICER threshold
                                 if (costPerPatient <= 5000) {
                                     lines.push(`ICER Analysis: Highly cost-effective.`);
                                     lines.push(`Generic pricing maximizes public health utility.`);
