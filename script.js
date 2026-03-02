@@ -427,3 +427,86 @@ document.addEventListener("DOMContentLoaded", function() {
     updateMap();
     updateAffordabilityWidget();
 });
+
+// --- 8. ANTITRUST & MARKET CONCENTRATION (HHI) ---
+
+function updateHHIWidget() {
+    const numFirms = parseInt(document.getElementById('slider-hhi-firms').value);
+    
+    // Simulate market share logic: 
+    // If 1 firm, it has 100%. 
+    // If N firms, the original patent holder retains a dominant premium (e.g., 40%), and generics split the rest.
+    let shares = [];
+    if (numFirms === 1) {
+        shares.push(100);
+    } else {
+        // Originator keeps a decaying premium share, minimum 20%
+        const originatorShare = Math.max(20, 100 - (numFirms * 8)); 
+        shares.push(originatorShare);
+        
+        // Generics evenly split the remaining market
+        const remainingShare = 100 - originatorShare;
+        const genericShare = remainingShare / (numFirms - 1);
+        for(let i=0; i < numFirms - 1; i++) {
+            shares.push(genericShare);
+        }
+    }
+    
+    // Calculate HHI
+    let hhi = 0;
+    shares.forEach(s => {
+        hhi += Math.pow(s, 2);
+    });
+    hhi = Math.round(hhi);
+    
+    // Update Score UI
+    const scoreVal = document.getElementById('hhi-score-val');
+    const badge = document.getElementById('hhi-status-badge');
+    
+    scoreVal.innerText = hhi.toLocaleString();
+    
+    if (hhi > 2500) {
+        scoreVal.className = "text-5xl font-mono font-bold mb-2 transition-colors duration-300 text-red-500";
+        badge.innerText = "Highly Concentrated";
+        badge.className = "text-sm font-bold tracking-widest uppercase py-1 px-3 rounded inline-block mt-2 bg-red-900 text-red-200 border border-red-500";
+    } else if (hhi >= 1500) {
+        scoreVal.className = "text-5xl font-mono font-bold mb-2 transition-colors duration-300 text-yellow-400";
+        badge.innerText = "Moderately Concentrated";
+        badge.className = "text-sm font-bold tracking-widest uppercase py-1 px-3 rounded inline-block mt-2 bg-yellow-900 text-yellow-200 border border-yellow-500";
+    } else {
+        scoreVal.className = "text-5xl font-mono font-bold mb-2 transition-colors duration-300 text-green-400";
+        badge.innerText = "Unconcentrated (Competitive)";
+        badge.className = "text-sm font-bold tracking-widest uppercase py-1 px-3 rounded inline-block mt-2 bg-green-900 text-green-200 border border-green-500";
+    }
+    
+    // Render the visual share blocks
+    renderHHIBlocks(shares);
+}
+
+function renderHHIBlocks(shares) {
+    const container = document.getElementById('hhi-visual-container');
+    container.innerHTML = '';
+    
+    shares.forEach((share, index) => {
+        const block = document.createElement('div');
+        // Visual area is relative to the share. We use flex-basis to approximate area division.
+        block.style.width = `${share}%`;
+        block.style.height = '100%';
+        block.className = `flex flex-col justify-center items-center border-r border-white transition-all duration-500 overflow-hidden ${index === 0 ? 'bg-brandDark text-white' : 'bg-gray-300 text-brandDark'}`;
+        
+        if (share > 5) { // Only show text if the block is wide enough
+            block.innerHTML = `<span class="font-bold text-lg">${Math.round(share)}%</span>
+                               <span class="text-[10px] uppercase font-mono tracking-tighter opacity-70">${index === 0 ? 'Originator' : 'Generic'}</span>`;
+        }
+        
+        container.appendChild(block);
+    });
+}
+
+// Add this to your existing DOMContentLoaded block in script.js
+document.addEventListener("DOMContentLoaded", function() {
+    // ... existing initializations ...
+    
+    document.getElementById('slider-hhi-firms').addEventListener('input', updateHHIWidget);
+    updateHHIWidget(); // Initialize it on load
+});
