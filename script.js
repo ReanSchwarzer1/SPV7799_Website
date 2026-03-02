@@ -46,7 +46,7 @@ function setSynthesis(route) {
         cost.className = "text-5xl font-bold text-scrollRed font-mono transition-colors duration-300";
         state.patentActive = true; 
         
-        // BUG FIX: Sync visual UI in Section 3
+        // BUG FIX: Consistently syncing the UI sliders
         if (compSlider) { compSlider.disabled = true; compSlider.value = 1; }
         if (compNote) { compNote.innerText = "Locked by Patent."; compNote.className = "text-xs text-red-500 mt-1 font-bold"; }
         if (statusLabel) { statusLabel.innerText = "ACTIVE"; statusLabel.className = "text-red-600 font-bold"; }
@@ -62,7 +62,7 @@ function setSynthesis(route) {
         cost.className = "text-5xl font-bold text-green-500 font-mono transition-colors duration-300";
         state.patentActive = false; 
         
-        // BUG FIX: Sync visual UI in Section 3
+        // BUG FIX: Consistently syncing the UI sliders
         if (compSlider) { compSlider.disabled = false; compSlider.value = 15; }
         if (compNote) { compNote.innerText = "Market open! Adjust competitors."; compNote.className = "text-xs text-green-600 mt-1 font-bold"; }
         if (statusLabel) { statusLabel.innerText = "REJECTED / CL GRANTED"; statusLabel.className = "text-green-600 font-bold"; }
@@ -88,8 +88,7 @@ const legalCases = [
         rejectAction: "Apply Antitrust / Fine",
         resultReject: "Correct. The Competition Commission of India (CCI) penalizes 'refusal to deal' tactics. The artificial monopoly is broken, allowing generic manufacturers (like IPCA) to supply the market at ~$0.10 per pill.",
         resultGrant: "Incorrect. Allowing closed distribution loopholes results in catastrophic price hikes (from $13.50 to $750/pill) for essential, off-patent medicines.",
-        citation: "Real Case: FTC v. Vyera Pharmaceuticals, LLC (2022). US regulators eventually sued to stop this exact scheme, but the loophole delayed generic entry for years.",
-        opensMarket: true
+        citation: "Real Case: FTC v. Vyera Pharmaceuticals, LLC (2022). US regulators eventually sued to stop this exact scheme, but the loophole delayed generic entry for years."
     },
     {
         title: "Novartis AG vs. Union of India",
@@ -99,8 +98,7 @@ const legalCases = [
         rejectAction: "Apply Sec 3(d)",
         resultReject: "Correct. The Supreme Court rejected the patent in 2013 under Section 3(d). The generic market remained open, dropping patient costs from ~$2,666/month down to ~$177/month.",
         resultGrant: "Incorrect in reality. Granting this would have allowed 'evergreening' and locked out affordable Indian generics.",
-        citation: "Citation: Novartis AG v. Union of India, Supreme Court of India (2013).",
-        opensMarket: true
+        citation: "Citation: Novartis AG v. Union of India, Supreme Court of India (2013)."
     },
     {
         title: "Bayer Corp. vs. Natco Pharma",
@@ -110,8 +108,7 @@ const legalCases = [
         rejectAction: "Grant Compulsory License",
         resultReject: "Correct. In 2012, India granted its first CL to Natco. Natco sold the generic for ₹8,800/month (a 97% price drop) while paying Bayer a 6% royalty.",
         resultGrant: "If denied, 99% of Indian patients requiring this life-saving drug would have been entirely priced out.",
-        citation: "Citation: Bayer Corp. v. Union of India, Controller of Patents (2012).",
-        opensMarket: true
+        citation: "Citation: Bayer Corp. v. Union of India, Controller of Patents (2012)."
     },
     {
         title: "F. Hoffmann-La Roche Ltd. vs. Cipla",
@@ -121,8 +118,7 @@ const legalCases = [
         rejectAction: "Deny Injunction",
         resultReject: "Correct. The Delhi High Court denied the injunction in 2009. Roche's drug cost Rs 4,800/pill, while Cipla's generic cost Rs 1,600/pill. The court prioritized public access to life-saving drugs over IP enforcement.",
         resultGrant: "Granting the injunction would have prioritized intellectual property over immediate public health access.",
-        citation: "Citation: F. Hoffmann-La Roche Ltd. v. Cipla Ltd., Delhi High Court (2009).",
-        opensMarket: true
+        citation: "Citation: F. Hoffmann-La Roche Ltd. v. Cipla Ltd., Delhi High Court (2009)."
     },
     {
         title: "Gilead Sciences vs. Generic Manufacturers",
@@ -132,8 +128,7 @@ const legalCases = [
         rejectAction: "Intervene / Force Market Open",
         resultReject: "Correct. Following patent oppositions, Gilead issued voluntary licenses to 11 Indian manufacturers. The US price was $84,000/course; the generic Indian price dropped to ~$300-$900/course for 101 developing nations.",
         resultGrant: "A strict monopoly without voluntary licensing would have severely restricted global Hep C eradication.",
-        citation: "Data Source: Hill A. et al., 'Rapid reductions in prices for generic sofosbuvir...', PMC4946692 (2016).",
-        opensMarket: true
+        citation: "Data Source: Hill A. et al., 'Rapid reductions in prices for generic sofosbuvir...', PMC4946692 (2016)."
     },
     {
         title: "Pfizer vs. Generic Challengers",
@@ -143,8 +138,7 @@ const legalCases = [
         rejectAction: "Revoke Patent",
         resultReject: "Correct. The Indian Patent Office revoked the patent in 2012 for lacking an inventive step. Pfizer's price was Rs 1.96 lakh/course; Cipla offered generics at a fraction of the cost.",
         resultGrant: "Upholding weak, structurally obvious patents stifles the 'Alternative Synthesis' ecosystem.",
-        citation: "Citation: Post-grant opposition by Cipla/Natco against Patent IN209251 (2012).",
-        opensMarket: true
+        citation: "Citation: Post-grant opposition by Cipla/Natco against Patent IN209251 (2012)."
     }
 ];
 
@@ -166,7 +160,7 @@ function renderCase() {
     document.getElementById('ruling-outcome').classList.add('hidden');
     state.patentActive = true; 
     
-    // BUG FIX: Reset sliders to Patented Monopoly state for new cases
+    // BUG FIX: Reset sliders to Patented Monopoly state for new cases cleanly
     const compSlider = document.getElementById('slider-comp');
     const compNote = document.getElementById('comp-note');
     const statusLabel = document.getElementById('val-monopoly-status');
@@ -358,7 +352,7 @@ function updateMap() {
     const chinaNode = document.getElementById('node-china');
     
     const exportVolume = historicalExportData[year];
-    let contextText = "Pre-2005: Market is heavily restricted by TRIPS transition period.";
+    let contextText = "Pre-2005: Market is heavily restricted by TRIPS compliance transition.";
     
     if (year >= 2005) contextText = "2005 Patents Act amended. Generic scaling rapidly accelerates for Africa/EU.";
     if (year >= 2012) contextText = "Compulsory Licensing and patent invalidations open major US and Global South markets.";
@@ -367,19 +361,26 @@ function updateMap() {
     document.getElementById('export-volume').innerText = `$${exportVolume.toFixed(1)} Billion`;
     document.getElementById('export-context').innerText = contextText;
 
+    // BUG FIX: Calculate Absolute Pixel Positions instead of invalid SVGs with "%" 
+    const rect = svg.getBoundingClientRect();
+    const w = rect.width || 800; // Fallback width if missing
+    const h = rect.height || 550;
+
+    const pt = (xPct, yPct) => `${(xPct / 100) * w} ${(yPct / 100) * h}`;
     const baseWidth = (exportVolume / 5); 
     let paths = '';
     
-    if (year >= 2001) paths += `<path d="M 68% 45% Q 60% 60% 52% 60%" fill="none" stroke="#22c55e" stroke-width="${baseWidth}" class="flow-line opacity-80" />`;
-    if (year >= 2003) paths += `<path d="M 68% 45% Q 60% 30% 50% 30%" fill="none" stroke="#eab308" stroke-width="${baseWidth * 0.8}" class="flow-line opacity-80" />`;
-    if (year >= 2006) paths += `<path d="M 68% 45% Q 45% 20% 22% 35%" fill="none" stroke="#dc2626" stroke-width="${baseWidth * 1.3}" class="flow-line opacity-80" />`;
+    if (year >= 2001) paths += `<path d="M ${pt(68, 45)} Q ${pt(60, 60)} ${pt(52, 60)}" fill="none" stroke="#22c55e" stroke-width="${baseWidth}" class="flow-line opacity-80" />`;
+    if (year >= 2003) paths += `<path d="M ${pt(68, 45)} Q ${pt(60, 30)} ${pt(50, 30)}" fill="none" stroke="#eab308" stroke-width="${baseWidth * 0.8}" class="flow-line opacity-80" />`;
+    if (year >= 2006) paths += `<path d="M ${pt(68, 45)} Q ${pt(45, 20)} ${pt(22, 35)}" fill="none" stroke="#dc2626" stroke-width="${baseWidth * 1.3}" class="flow-line opacity-80" />`;
 
     if (showAPI) {
         chinaNode.classList.remove('hidden');
-        paths += `<path d="M 75% 40% Q 72% 42% 68% 45%" fill="none" stroke="#991b1b" stroke-width="4" stroke-dasharray="10" class="flow-line-reverse opacity-90" />`;
+        paths += `<path d="M ${pt(75, 40)} Q ${pt(72, 42)} ${pt(68, 45)}" fill="none" stroke="#991b1b" stroke-width="3" stroke-dasharray="8 6" class="flow-line-reverse opacity-90" />`;
     } else {
         chinaNode.classList.add('hidden');
     }
+    
     svg.innerHTML = paths;
 }
 
@@ -689,6 +690,11 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('select-market-state').addEventListener('change', updateAffordabilityWidget);
     document.getElementById('select-wage-profile').addEventListener('change', updateAffordabilityWidget);
     document.getElementById('slider-hhi-firms').addEventListener('input', updateHHIWidget);
+    
+    // BUG FIX: Resize map dynamically if the window scales, keeping nodes and paths matched
+    window.addEventListener('resize', () => {
+        if (state.chartsInitialized) updateMap();
+    });
     
     // Initialize all widgets
     updateCharts();
