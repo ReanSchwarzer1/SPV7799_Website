@@ -36,27 +36,38 @@
     <main class="max-w-6xl mx-auto px-6 py-12">
         
         <section class="mb-24" id="molecular-storyteller">
-            <h3 class="text-3xl font-bold font-sans mb-4">1. The Molecular Scrollyteller</h3>
+            <h3 class="text-3xl font-bold font-sans mb-4">1. The Molecular Scrollyteller: The Daraprim Paradox</h3>
             <div class="bg-brandDark text-white p-8 rounded-xl shadow-2xl relative overflow-hidden flex flex-col md:flex-row gap-8 items-center mt-4">
                 <div class="relative z-10 md:w-1/2">
                     <h4 class="text-2xl font-bold font-sans mb-2 text-voxYellow">The Synthesis Puzzle</h4>
-                    <p class="font-serif text-lg mb-6 text-gray-300">The chemical structure of a life-saving drug is public knowledge. But the <em>process</em> to make it is patented. Indian chemists innovate by finding "Alternative Synthesis Routes" to build the exact same molecule without breaking the law.</p>
+                    <p class="font-serif text-lg mb-4 text-gray-300">The chemical formula for Pyrimethamine (brand name Daraprim) is <span class="font-mono bg-gray-800 p-1 rounded border border-gray-600">C<sub>12</sub>H<sub>13</sub>ClN<sub>4</sub></span>. It is an essential antiparasitic drug used to treat toxoplasmosis.</p>
+                    <p class="font-serif text-sm mb-6 text-gray-400">In 2015, Turing Pharmaceuticals acquired the US marketing rights and exploited closed distribution loopholes to artificially monopolize the market, hiking the price overnight by over 5,400%. Meanwhile, Indian generic manufacturers continued synthesizing the exact same molecule for pennies.</p>
+                    
                     <div class="bg-white text-brandDark p-6 rounded-lg mt-6">
-                        <h5 class="font-bold uppercase tracking-wide text-sm mb-4">Choose Your Manufacturing Process</h5>
+                        <h5 class="font-bold uppercase tracking-wide text-sm mb-4">Select Market Environment</h5>
                         <div class="flex gap-4">
-                            <button onclick="setSynthesis('patented')" id="btn-patented" class="flex-1 py-3 px-4 bg-gray-200 border-2 border-transparent font-bold rounded hover:bg-gray-300 transition text-sm">Patented Route (US/EU)</button>
-                            <button onclick="setSynthesis('alternative')" id="btn-alternative" class="flex-1 py-3 px-4 bg-gray-200 border-2 border-transparent font-bold rounded hover:bg-gray-300 transition text-sm">Alternative Route (India)</button>
+                            <button onclick="setSynthesis('patented')" id="btn-patented" class="flex-1 py-3 px-4 bg-gray-200 border-2 border-brandDark font-bold rounded hover:bg-gray-300 transition text-sm">US Monopoly (Turing)</button>
+                            <button onclick="setSynthesis('alternative')" id="btn-alternative" class="flex-1 py-3 px-4 bg-gray-200 border-2 border-transparent font-bold rounded hover:bg-gray-300 transition text-sm">Indian Generic (IPCA)</button>
                         </div>
-                        <div class="mt-6 flex justify-between items-center border-t pt-4">
-                            <span class="font-serif">Patient Cost (Monthly):</span>
-                            <span id="api-cost" class="text-3xl font-bold text-scrollRed font-mono">$2,666</span>
+                        <div class="mt-6 flex justify-between items-center border-t border-gray-300 pt-4">
+                            <span class="font-serif font-bold text-lg">Cost Per Pill:</span>
+                            <span id="api-cost" class="text-5xl font-bold text-scrollRed font-mono">$750.00</span>
                         </div>
                     </div>
+                    
+                    <div class="mt-6 bg-gray-900 p-4 rounded-lg border border-gray-700 shadow-inner">
+                        <h5 class="font-bold text-xs uppercase tracking-widest text-gray-500 mb-3">Real Data & Citations</h5>
+                        <ul class="text-xs font-mono text-gray-400 space-y-2">
+                            <li>↳ <strong class="text-gray-200">Molecule:</strong> Pyrimethamine (PubChem CID: 4993).</li>
+                            <li>↳ <strong class="text-gray-200">US Price Data:</strong> Turing Pharmaceuticals hiked the price from $13.50 to $750/pill in August 2015.</li>
+                            <li>↳ <strong class="text-gray-200">Generic Price Data:</strong> Indian formulations retailed globally at ~₹3-10 ($0.04 - $0.15) per pill during the same period.</li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="md:w-1/2 molecule-bg h-96 rounded-lg border border-gray-700 relative cursor-move">
+                <div class="md:w-1/2 molecule-bg h-full min-h-[450px] rounded-lg border border-gray-700 relative cursor-move shadow-inner">
                     <div id="molecule-container" class="absolute inset-0 w-full h-full z-10"></div>
-                    <div class="absolute bottom-4 right-4 text-gray-500 font-sans text-xs z-0">
-                        Drag to rotate 3D Model
+                    <div class="absolute bottom-4 right-4 text-gray-300 font-sans text-xs z-20 bg-black bg-opacity-60 px-3 py-2 rounded shadow">
+                        Drag to rotate Pyrimethamine 3D Model
                     </div>
                 </div>
             </div>

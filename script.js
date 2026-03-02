@@ -9,13 +9,15 @@ let state = {
 
 let glViewer = null;
 
-// --- 1. SYNTHESIS LOGIC & WEBGL MOLECULE ---
+// --- 1. SYNTHESIS LOGIC & WEBGL MOLECULE (DARAPRIM) ---
 function initWebGLViewer() {
     let container = document.getElementById("molecule-container");
     glViewer = $3Dmol.createViewer(container, { backgroundColor: "transparent" });
 
-    $3Dmol.download("cid:5291", glViewer, { onAll: function() {
-        glViewer.setStyle({}, {stick: {radius: 0.15, colorscheme: 'cyanCarbon'}});
+    // CID 4993 is Pyrimethamine (Daraprim)
+    $3Dmol.download("cid:4993", glViewer, { onAll: function() {
+        // Default to the expensive/monopoly red visualization
+        glViewer.setStyle({}, {stick: {radius: 0.15, colorscheme: 'redCarbon'}});
         glViewer.zoomTo();
         glViewer.render();
     }});
@@ -32,17 +34,19 @@ function setSynthesis(route) {
     
     if(route === 'patented') {
         btnPat.classList.add('border-brandDark', 'bg-white');
-        cost.innerText = "$2,666"; 
-        cost.className = "text-3xl font-bold text-scrollRed font-mono";
+        cost.innerText = "$750.00"; 
+        cost.className = "text-5xl font-bold text-scrollRed font-mono transition-colors duration-300";
         if(glViewer) {
-            glViewer.setStyle({}, {stick: {radius: 0.15, colorscheme: 'cyanCarbon'}});
+            // "Monopoly" visualization
+            glViewer.setStyle({}, {stick: {radius: 0.15, colorscheme: 'redCarbon'}});
             glViewer.render();
         }
     } else {
         btnAlt.classList.add('border-brandDark', 'bg-white');
-        cost.innerText = "$177"; 
-        cost.className = "text-3xl font-bold text-green-600 font-mono";
+        cost.innerText = "$0.10"; 
+        cost.className = "text-5xl font-bold text-green-500 font-mono transition-colors duration-300";
         if(glViewer) {
+            // "Generic" visualization
             glViewer.setStyle({}, {
                 stick: {radius: 0.1, colorscheme: 'greenCarbon'}, 
                 sphere: {scale: 0.3, colorscheme: 'greenCarbon'}
