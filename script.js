@@ -170,61 +170,6 @@ function makeRuling(isGrant) {
 // --- 3, 4, 5. CHART.JS LOGIC ---
 let barChart, lineChart, sdChart, qalyChart;
 
-document.addEventListener("DOMContentLoaded", function() {
-    initWebGLViewer();
-    renderCase();
-
-    const barCtx = document.getElementById('barChart').getContext('2d');
-    const lineCtx = document.getElementById('lineChart').getContext('2d');
-    const sdCtx = document.getElementById('sdChart').getContext('2d');
-    const qalyCtx = document.getElementById('qalyChart').getContext('2d');
-
-    barChart = new Chart(barCtx, {
-        type: 'bar',
-        data: { labels: ['Private Profit', 'Social Access'], datasets: [{ label: 'Economic Value', backgroundColor: ['#1a1a1a', '#fffb00'], data: [0, 0] }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: 3500 } } }
-    });
-
-    lineChart = new Chart(lineCtx, {
-        type: 'line',
-        data: { labels: ['Yr1', 'Yr2', 'Yr3', 'Yr4', 'Yr5', 'Yr6', 'Yr7', 'Yr8', 'Yr9', 'Yr10'], datasets: [{ label: 'Price Index (%)', borderColor: '#d92525', backgroundColor: 'rgba(217, 37, 37, 0.1)', fill: true, data: [], tension: 0.3 }] },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 110 } } }
-    });
-
-    sdChart = new Chart(sdCtx, {
-        type: 'scatter',
-        data: {
-            datasets: [
-                { label: 'Supply (S)', borderColor: '#1d4ed8', backgroundColor: '#1d4ed8', showLine: true, fill: false, tension: 0, data: [] },
-                { label: 'Demand (D)', borderColor: '#15803d', backgroundColor: '#15803d', showLine: true, fill: false, tension: 0, data: [] },
-                { label: 'Equilibrium (E)', backgroundColor: '#d92525', pointRadius: 6, data: [] }
-            ]
-        },
-        options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Quantity (Q)' }, min: 0, max: 200 }, y: { title: { display: true, text: 'Price (P)' }, min: 0, max: 150 } } }
-    });
-
-    qalyChart = new Chart(qalyCtx, {
-        type: 'bar',
-        data: { labels: ['Patients Treated', 'Total QALYs Gained'], datasets: [{ label: 'Volume', backgroundColor: ['#fffb00', '#4ade80'], data: [0, 0] }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 25000 } } }
-    });
-
-    state.chartsInitialized = true;
-    
-    document.getElementById('slider-comp').addEventListener('input', updateCharts);
-    document.getElementById('slider-procure').addEventListener('input', updateCharts);
-    document.getElementById('slider-supply-shift').addEventListener('input', updateSDChart);
-    document.getElementById('slider-demand-shift').addEventListener('input', updateSDChart);
-    document.getElementById('slider-qaly-cost').addEventListener('input', updateQALYChart);
-    document.getElementById('slider-map-year').addEventListener('input', updateMap);
-    document.getElementById('toggle-api').addEventListener('change', updateMap);
-    
-    updateCharts();
-    updateSDChart();
-    updateQALYChart();
-    updateMap();
-});
-
 function updateCharts() {
     if(!state.chartsInitialized) return;
     state.competitors = parseInt(document.getElementById('slider-comp').value);
@@ -239,9 +184,9 @@ function updateCharts() {
     const demandMultiplier = 1 + (state.procurement * 0.5); 
     let quantity = (maxWillingPrice - currentPrice) * demandMultiplier;
 
-    let producerSurplus = (currentPrice - marginalCost) * quantity;
-    if (producerSurplus < 0) producerSurplus = 0;
-    let consumerSurplus = 0.5 * (maxWillingPrice - currentPrice) * quantity;
+    // Fixed Bug: Ensured producer surplus doesn't drop below 0 if parameters are pushed to extremes
+    let producerSurplus = Math.max(0, (currentPrice - marginalCost) * quantity);
+    let consumerSurplus = Math.max(0, 0.5 * (maxWillingPrice - currentPrice) * quantity);
 
     barChart.data.datasets[0].data = [Math.round(producerSurplus), Math.round(consumerSurplus)];
     barChart.update();
@@ -293,8 +238,6 @@ function updateQALYChart() {
 }
 
 // --- 6. DYNAMIC MAP INTERACTIVITY WITH REAL DATA ---
-
-// Actual historical export data (in USD Billions) sourced from IBEF / Pharmexcil
 const historicalExportData = {
     2000: 1.5, 2001: 1.9, 2002: 2.3, 2003: 2.8, 2004: 3.5,
     2005: 4.2, 2006: 5.0, 2007: 6.1, 2008: 7.2, 2009: 8.5,
@@ -303,24 +246,11 @@ const historicalExportData = {
     2020: 24.4, 2021: 24.6, 2022: 25.3, 2023: 27.9, 2024: 28.5
 };
 
-// Real regional breakdown data
 const regionalData = {
-    'India': {
-        share: "100%", color: "text-brandDark", therapy: "API Synthesis & Formulation",
-        detail: "The 'Pharmacy of the World'. India accounts for 20% of global generic exports by volume, operating over 600 FDA-approved manufacturing sites (the most outside the US)."
-    },
-    'USA': {
-        share: "34%", color: "text-red-600", therapy: "Cardiovascular, CNS, Anti-Diabetic",
-        detail: "The largest single export destination. Indian manufacturers hold over 40% of the generic market share in the US, drastically lowering healthcare costs through ANDA approvals."
-    },
-    'Africa': {
-        share: "19%", color: "text-green-500", therapy: "Antiretrovirals (HIV), Antimalarials, Vaccines",
-        detail: "A lifeline for public health. Indian generics supply over 80% of all Antiretroviral (ARV) drugs used globally to combat HIV/AIDS, largely distributed via NGOs and governments across Sub-Saharan Africa."
-    },
-    'Europe': {
-        share: "16%", color: "text-yellow-600", therapy: "Complex Generics, Injectables, Oncology",
-        detail: "A highly regulated market. India is a critical supplier to the UK's NHS and various EU public health systems, stepping in specifically during supply chain shortages."
-    }
+    'India': { share: "100%", color: "text-brandDark", therapy: "API Synthesis & Formulation", detail: "The 'Pharmacy of the World'. India accounts for 20% of global generic exports by volume, operating over 600 FDA-approved manufacturing sites." },
+    'USA': { share: "34%", color: "text-red-600", therapy: "Cardiovascular, CNS, Anti-Diabetic", detail: "The largest single export destination. Indian manufacturers hold over 40% of the generic market share in the US, drastically lowering healthcare costs." },
+    'Africa': { share: "19%", color: "text-green-500", therapy: "Antiretrovirals (HIV), Antimalarials, Vaccines", detail: "A lifeline for public health. Indian generics supply over 80% of all Antiretroviral (ARV) drugs used globally to combat HIV/AIDS." },
+    'Europe': { share: "16%", color: "text-yellow-600", therapy: "Complex Generics, Injectables, Oncology", detail: "A highly regulated market. India is a critical supplier to the UK's NHS and various EU public health systems during shortages." }
 };
 
 function selectRegion(regionKey) {
@@ -328,7 +258,6 @@ function selectRegion(regionKey) {
     const panel = document.getElementById('region-info-panel');
     
     document.getElementById('region-title').innerText = regionKey === 'USA' ? 'North America' : regionKey;
-    
     const shareEl = document.getElementById('region-share');
     shareEl.innerText = data.share;
     shareEl.className = `text-4xl font-mono font-bold ${data.color}`;
@@ -338,7 +267,6 @@ function selectRegion(regionKey) {
     
     panel.classList.remove('hidden');
     
-    // Hide the little bounce instruction once the user clicks a node
     const instruct = document.getElementById('map-instruction');
     if(instruct) instruct.style.display = 'none';
 }
@@ -351,7 +279,6 @@ function updateMap() {
     const svg = document.getElementById('dynamic-map-lines');
     const chinaNode = document.getElementById('node-china');
     
-    // Pull actual data from the dictionary
     const exportVolume = historicalExportData[year];
     let contextText = "Pre-2005: Market is heavily restricted by TRIPS transition period.";
     
@@ -362,27 +289,141 @@ function updateMap() {
     document.getElementById('export-volume').innerText = `$${exportVolume.toFixed(1)} Billion`;
     document.getElementById('export-context').innerText = contextText;
 
-    // Line thickness scales dynamically with real export volume
     const baseWidth = (exportVolume / 5); 
-
     let paths = '';
     
-    // India to Africa (Greens)
     if (year >= 2001) paths += `<path d="M 68% 45% Q 60% 60% 52% 60%" fill="none" stroke="#22c55e" stroke-width="${baseWidth}" class="flow-line opacity-80" />`;
-    
-    // India to Europe (Yellows)
     if (year >= 2003) paths += `<path d="M 68% 45% Q 60% 30% 50% 30%" fill="none" stroke="#eab308" stroke-width="${baseWidth * 0.8}" class="flow-line opacity-80" />`;
-    
-    // India to US (Reds)
     if (year >= 2006) paths += `<path d="M 68% 45% Q 45% 20% 22% 35%" fill="none" stroke="#dc2626" stroke-width="${baseWidth * 1.3}" class="flow-line opacity-80" />`;
 
-    // API Toggle (China to India)
     if (showAPI) {
         chinaNode.classList.remove('hidden');
         paths += `<path d="M 75% 40% Q 72% 42% 68% 45%" fill="none" stroke="#991b1b" stroke-width="4" stroke-dasharray="10" class="flow-line-reverse opacity-90" />`;
     } else {
         chinaNode.classList.add('hidden');
     }
-
     svg.innerHTML = paths;
 }
+
+// --- 7. HUMAN METRIC: AFFORDABILITY & LERNER INDEX ---
+const affordabilityData = {
+    drugs: {
+        patented: { price: 5000, mc: 20, name: "Bayer's Nexavar (Sorafenib)" },
+        generic: { price: 105, mc: 20, name: "Natco's Sorafenib (Compulsory License)" }
+    },
+    wages: {
+        unskilled: { daily: 3.20, name: "Unskilled Laborer (MGNREGA)" },
+        salaried: { daily: 15.00, name: "Average Urban Salaried Worker" }
+    }
+};
+
+function updateAffordabilityWidget() {
+    const marketState = document.getElementById('select-market-state').value;
+    const wageProfile = document.getElementById('select-wage-profile').value;
+    
+    const drug = affordabilityData.drugs[marketState];
+    const wage = affordabilityData.wages[wageProfile];
+    
+    document.getElementById('market-price-display').innerText = `Market Price: $${drug.price.toLocaleString()} / month`;
+    document.getElementById('wage-display').innerText = `Daily Wage: $${wage.daily.toFixed(2)} / day`;
+    
+    const daysRequired = Math.round(drug.price / wage.daily);
+    
+    animateValue("days-worked-val", 0, daysRequired, 800);
+    
+    document.getElementById('calc-pat-p').innerText = affordabilityData.drugs.patented.price;
+    document.getElementById('calc-pat-p2').innerText = affordabilityData.drugs.patented.price;
+    document.getElementById('calc-gen-p').innerText = affordabilityData.drugs.generic.price;
+    document.getElementById('calc-gen-p2').innerText = affordabilityData.drugs.generic.price;
+
+    renderLaborGrid(daysRequired);
+}
+
+function renderLaborGrid(days) {
+    const container = document.getElementById('labor-grid-container');
+    container.innerHTML = ''; 
+    
+    const visualCap = 2500; 
+    const renderCount = Math.min(days, visualCap);
+    
+    const medContainer = document.createElement('div');
+    medContainer.className = "flex flex-wrap gap-1 mb-6 pb-4 border-b border-gray-300";
+    medContainer.innerHTML = `<div class="w-full text-xs font-bold text-gray-500 mb-1 uppercase tracking-wide">Supply: 30 Days of Medicine</div>`;
+    for(let i=0; i<30; i++) medContainer.innerHTML += `<div class="w-3 h-3 border border-gray-400 rounded-sm"></div>`;
+    container.appendChild(medContainer);
+
+    const laborContainer = document.createElement('div');
+    laborContainer.className = "flex flex-wrap gap-1";
+    laborContainer.innerHTML = `<div class="w-full text-xs font-bold text-scrollRed mb-1 uppercase tracking-wide">Cost: ${days.toLocaleString()} Days of Labor</div>`;
+    
+    let blockHTML = '';
+    for(let i=0; i<renderCount; i++) blockHTML += `<div class="labor-block w-3 h-3 bg-scrollRed rounded-sm shadow-sm"></div>`;
+    
+    if(days > visualCap) blockHTML += `<div class="w-full text-xs font-bold text-gray-500 mt-2 italic">... + ${(days - visualCap).toLocaleString()} more days not shown.</div>`;
+    
+    laborContainer.innerHTML += blockHTML;
+    container.appendChild(laborContainer);
+    
+    const blocks = document.querySelectorAll('.labor-block');
+    blocks.forEach((block, index) => {
+        if(index < 200) {
+            block.style.opacity = '0';
+            setTimeout(() => { block.style.opacity = '1'; }, index * 2);
+        }
+    });
+}
+
+// Fixed Bug: Storing animation frame ID prevents numbers jittering on fast clicks
+function animateValue(id, start, end, duration) {
+    const obj = document.getElementById(id);
+    if (!obj) return;
+    
+    if (obj.animationId) window.cancelAnimationFrame(obj.animationId);
+    
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
+        if (progress < 1) {
+            obj.animationId = window.requestAnimationFrame(step);
+        }
+    };
+    obj.animationId = window.requestAnimationFrame(step);
+}
+
+// --- GLOBAL INITIALIZATION (Merged for Clean Execution) ---
+document.addEventListener("DOMContentLoaded", function() {
+    initWebGLViewer();
+    renderCase();
+
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    const sdCtx = document.getElementById('sdChart').getContext('2d');
+    const qalyCtx = document.getElementById('qalyChart').getContext('2d');
+
+    barChart = new Chart(barCtx, { type: 'bar', data: { labels: ['Private Profit', 'Social Access'], datasets: [{ label: 'Economic Value', backgroundColor: ['#1a1a1a', '#fffb00'], data: [0, 0] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMax: 3500 } } } });
+    lineChart = new Chart(lineCtx, { type: 'line', data: { labels: ['Yr1', 'Yr2', 'Yr3', 'Yr4', 'Yr5', 'Yr6', 'Yr7', 'Yr8', 'Yr9', 'Yr10'], datasets: [{ label: 'Price Index (%)', borderColor: '#d92525', backgroundColor: 'rgba(217, 37, 37, 0.1)', fill: true, data: [], tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 110 } } } });
+    sdChart = new Chart(sdCtx, { type: 'scatter', data: { datasets: [{ label: 'Supply (S)', borderColor: '#1d4ed8', backgroundColor: '#1d4ed8', showLine: true, fill: false, tension: 0, data: [] }, { label: 'Demand (D)', borderColor: '#15803d', backgroundColor: '#15803d', showLine: true, fill: false, tension: 0, data: [] }, { label: 'Equilibrium (E)', backgroundColor: '#d92525', pointRadius: 6, data: [] }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Quantity (Q)' }, min: 0, max: 200 }, y: { title: { display: true, text: 'Price (P)' }, min: 0, max: 150 } } } });
+    qalyChart = new Chart(qalyCtx, { type: 'bar', data: { labels: ['Patients Treated', 'Total QALYs Gained'], datasets: [{ label: 'Volume', backgroundColor: ['#fffb00', '#4ade80'], data: [0, 0] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 25000 } } } });
+
+    state.chartsInitialized = true;
+    
+    document.getElementById('slider-comp').addEventListener('input', updateCharts);
+    document.getElementById('slider-procure').addEventListener('input', updateCharts);
+    document.getElementById('slider-supply-shift').addEventListener('input', updateSDChart);
+    document.getElementById('slider-demand-shift').addEventListener('input', updateSDChart);
+    document.getElementById('slider-qaly-cost').addEventListener('input', updateQALYChart);
+    document.getElementById('slider-map-year').addEventListener('input', updateMap);
+    document.getElementById('toggle-api').addEventListener('change', updateMap);
+    
+    // New Event Listeners from Section 7
+    document.getElementById('select-market-state').addEventListener('change', updateAffordabilityWidget);
+    document.getElementById('select-wage-profile').addEventListener('change', updateAffordabilityWidget);
+    
+    updateCharts();
+    updateSDChart();
+    updateQALYChart();
+    updateMap();
+    updateAffordabilityWidget();
+});

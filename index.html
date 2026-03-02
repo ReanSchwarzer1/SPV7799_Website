@@ -355,6 +355,87 @@
             </div>
         </section>
 
+        <section class="mb-24" id="affordability-index">
+            <h3 class="text-3xl font-bold font-sans mb-2">7. The Human Metric: Market Power & Wage Affordability</h3>
+            <p class="text-lg font-serif text-gray-600 mb-8">Macroeconomics plots abstract curves, but public health policy measures human labor. How many days must a person work just to afford one month of survival? Let's apply standard WHO policy metrics to real wage data.</p>
+            
+            <div class="bg-white border border-gray-200 shadow-xl rounded-xl overflow-hidden mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                    <div class="md:col-span-5 bg-brandGray p-6 border-r border-gray-200">
+                        <h4 class="font-bold text-lg mb-6 uppercase tracking-wide border-b pb-2">Policy Parameters</h4>
+                        
+                        <div class="mb-6">
+                            <label class="block font-sans font-semibold mb-2 text-brandDark">
+                                Select Drug Market State
+                            </label>
+                            <select id="select-market-state" class="w-full p-2 border border-gray-300 rounded font-sans text-sm focus:outline-none focus:ring-2 focus:ring-scrollRed">
+                                <option value="patented">Patented Monopoly (Bayer's Nexavar)</option>
+                                <option value="generic">Post-CL Generic (Natco's Sorafenib)</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-2 font-mono" id="market-price-display">Market Price: $5,000 / month</p>
+                        </div>
+
+                        <div class="mb-8">
+                            <label class="block font-sans font-semibold mb-2 text-brandDark">
+                                Select Patient Demographic
+                            </label>
+                            <select id="select-wage-profile" class="w-full p-2 border border-gray-300 rounded font-sans text-sm focus:outline-none focus:ring-2 focus:ring-scrollRed">
+                                <option value="unskilled">Unskilled Laborer (MGNREGA Wage)</option>
+                                <option value="salaried">Average Urban Salaried Worker</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-2 font-mono" id="wage-display">Daily Wage: $3.20 / day</p>
+                        </div>
+
+                        <div class="bg-brandDark text-white p-4 rounded-lg shadow-inner">
+                            <h5 class="text-sm uppercase tracking-widest text-gray-400 mb-1">WHO Affordability Score</h5>
+                            <div class="flex items-end gap-2 mb-2">
+                                <span class="text-5xl font-mono font-bold text-voxYellow" id="days-worked-val">1,562</span>
+                                <span class="text-sm font-serif pb-1 text-gray-300">Days of Labor</span>
+                            </div>
+                            <p class="text-xs leading-tight text-gray-400">Days of work required to afford a single 30-day treatment course. The WHO threshold for "affordable" is ≤ 1 day's wage.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-7 p-6 bg-white flex flex-col">
+                        <h5 class="font-bold text-sm uppercase tracking-wide text-gray-500 mb-4">Visualizing the Labor Gulf</h5>
+                        <div class="flex-grow bg-gray-50 border border-gray-200 rounded p-4 overflow-y-auto max-h-[300px]" id="labor-grid-container">
+                            </div>
+                        <div class="mt-4 flex gap-4 text-xs font-mono text-gray-500">
+                            <div class="flex items-center gap-1"><div class="w-3 h-3 bg-scrollRed"></div> = 1 Day of Work</div>
+                            <div class="flex items-center gap-1"><div class="w-3 h-3 border border-gray-400"></div> = 1 Day of Medicine</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg text-sm text-gray-800 font-sans shadow-inner">
+                <h5 class="font-bold text-lg mb-4 uppercase tracking-wide text-brandDark">Formulas & Real-World Policy Data</h5>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <strong class="text-scrollRed border-b border-blue-200 pb-1 block mb-2">1. The Lerner Index of Monopoly Power</strong>
+                        <div class="bg-white p-3 border border-gray-200 rounded mt-2 mb-3 text-center">
+                            <span class="font-mono font-bold text-lg">L = (P - MC) / P</span>
+                        </div>
+                        <p class="text-gray-600 mb-2">The Lerner Index (L) measures a firm's pricing power. <strong>P</strong> is Market Price, <strong>MC</strong> is Marginal Cost.</p>
+                        <ul class="space-y-1 text-xs font-mono text-gray-600 bg-white p-2 rounded border border-gray-200">
+                            <li>Patented L: (<span id="calc-pat-p">5000</span> - 20) / <span id="calc-pat-p2">5000</span> = <strong class="text-scrollRed">0.996</strong> (Extreme Monopoly)</li>
+                            <li>Generic L: (<span id="calc-gen-p">105</span> - 20) / <span id="calc-gen-p2">105</span> = <strong class="text-green-600">0.809</strong> (Competitive Margin)</li>
+                        </ul>
+                        <p class="text-xs mt-3 text-gray-500 font-mono">↳ Source: Lerner, A. P. (1934). "The Concept of Monopoly and the Measurement of Monopoly Power." <i>The Review of Economic Studies</i>.</p>
+                    </div>
+                    <div>
+                        <strong class="text-scrollRed border-b border-blue-200 pb-1 block mb-2">2. WHO / HAI Affordability Index</strong>
+                        <div class="bg-white p-3 border border-gray-200 rounded mt-2 mb-3 text-center">
+                            <span class="font-mono font-bold text-lg">A = C / W</span>
+                        </div>
+                        <p class="text-gray-600 mb-2">Where <strong>C</strong> is the cost of a standard treatment course, and <strong>W</strong> is the daily wage of the lowest-paid unskilled government worker.</p>
+                        <p class="text-xs mt-3 text-gray-500 font-mono">↳ Source Data 1: World Health Organization & Health Action International (2008). Methodology for measuring medicine prices.<br><br>
+                        ↳ Source Data 2: Ministry of Rural Development, Govt. of India. MGNREGA average notified wage rate (~₹267 or $3.20 USD/day).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <script src="script.js"></script>

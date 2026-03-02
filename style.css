@@ -115,3 +115,24 @@ input[type=range] {
         stroke-dashoffset: 100;
     }
 }
+
+/* Add smooth transition for the labor blocks */
+.labor-block {
+    transition: opacity 0.1s ease-in;
+}
+
+/* Custom scrollbar for the grid container to keep it neat */
+#labor-grid-container::-webkit-scrollbar {
+    width: 6px;
+}
+#labor-grid-container::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+    border-radius: 4px;
+}
+#labor-grid-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1; 
+    border-radius: 4px;
+}
+#labor-grid-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8; 
+}
