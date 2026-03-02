@@ -14,7 +14,6 @@ function initWebGLViewer() {
     let container = document.getElementById("molecule-container");
     glViewer = $3Dmol.createViewer(container, { backgroundColor: "transparent" });
 
-    // Fetch Imatinib (CID 5291) directly from PubChem
     $3Dmol.download("cid:5291", glViewer, { onAll: function() {
         glViewer.setStyle({}, {stick: {radius: 0.15, colorscheme: 'cyanCarbon'}});
         glViewer.zoomTo();
@@ -35,7 +34,6 @@ function setSynthesis(route) {
         btnPat.classList.add('border-brandDark', 'bg-white');
         cost.innerText = "$2,666"; 
         cost.className = "text-3xl font-bold text-scrollRed font-mono";
-        
         if(glViewer) {
             glViewer.setStyle({}, {stick: {radius: 0.15, colorscheme: 'cyanCarbon'}});
             glViewer.render();
@@ -44,7 +42,6 @@ function setSynthesis(route) {
         btnAlt.classList.add('border-brandDark', 'bg-white');
         cost.innerText = "$177"; 
         cost.className = "text-3xl font-bold text-green-600 font-mono";
-        
         if(glViewer) {
             glViewer.setStyle({}, {
                 stick: {radius: 0.1, colorscheme: 'greenCarbon'}, 
@@ -172,7 +169,7 @@ function makeRuling(isGrant) {
 }
 
 // --- 3. CHART.JS LOGIC WITH REAL ECONOMIC FORMULAS ---
-let barChart, lineChart;
+let barChart, lineChart, sdChart;
 
 document.addEventListener("DOMContentLoaded", function() {
     initWebGLViewer();
@@ -180,7 +177,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const barCtx = document.getElementById('barChart').getContext('2d');
     const lineCtx = document.getElementById('lineChart').getContext('2d');
+    const sdCtx = document.getElementById('sdChart').getContext('2d');
 
+    // Section 3 Charts
     barChart = new Chart(barCtx, {
         type: 'bar',
         data: {
@@ -199,12 +198,59 @@ document.addEventListener("DOMContentLoaded", function() {
         options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 110 } } }
     });
 
+    // Section 4 Supply & Demand Chart (Scatter Plot used to draw explicit crossing lines)
+    sdChart = new Chart(sdCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                {
+                    label: 'Supply (S)',
+                    borderColor: '#1d4ed8', // blue-700
+                    backgroundColor: '#1d4ed8',
+                    showLine: true,
+                    fill: false,
+                    tension: 0,
+                    data: []
+                },
+                {
+                    label: 'Demand (D)',
+                    borderColor: '#15803d', // green-700
+                    backgroundColor: '#15803d',
+                    showLine: true,
+                    fill: false,
+                    tension: 0,
+                    data: []
+                },
+                {
+                    label: 'Equilibrium (E)',
+                    backgroundColor: '#d92525', // red
+                    pointRadius: 6,
+                    data: []
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Quantity (Q)' }, min: 0, max: 200 },
+                y: { title: { display: true, text: 'Price (P)' }, min: 0, max: 150 }
+            }
+        }
+    });
+
     state.chartsInitialized = true;
     
+    // Listeners for Sec 3
     document.getElementById('slider-comp').addEventListener('input', updateCharts);
     document.getElementById('slider-procure').addEventListener('input', updateCharts);
+
+    // Listeners for Sec 4
+    document.getElementById('slider-supply-shift').addEventListener('input', updateSDChart);
+    document.getElementById('slider-demand-shift').addEventListener('input', updateSDChart);
     
     updateCharts();
+    updateSDChart();
     drawMapLines();
 });
 
@@ -214,43 +260,31 @@ function updateCharts() {
     state.competitors = parseInt(document.getElementById('slider-comp').value);
     state.procurement = parseInt(document.getElementById('slider-procure').value);
 
-    // Update UI text
     document.getElementById('val-comp').innerText = state.competitors;
     document.getElementById('val-procure').innerText = state.procurement === 1 ? 'Low' : (state.procurement === 2 ? 'Medium' : 'High');
 
-    // --- ACTUAL ECONOMIC MATH ---
-    // 1. Price Decay Formula (FDA Model): P_N = P_0 * N^(-0.75)
     const basePrice = 100; 
     let currentPrice = state.patentActive ? basePrice : basePrice * Math.pow(state.competitors, -0.75);
 
-    // 2. Welfare Economics (Linear Demand Model)
     const maxWillingPrice = 120;
     const marginalCost = 5; 
-    
-    // Govt procurement acts as a demand multiplier (shifts curve right)
     const demandMultiplier = 1 + (state.procurement * 0.5); 
     
-    // Quantity Demanded: Q = (Pmax - P) * Multiplier
     let quantity = (maxWillingPrice - currentPrice) * demandMultiplier;
 
-    // Producer Surplus = (Price - Marginal Cost) * Quantity
     let producerSurplus = (currentPrice - marginalCost) * quantity;
     if (producerSurplus < 0) producerSurplus = 0;
 
-    // Consumer Surplus = 0.5 * (Pmax - Price) * Quantity
     let consumerSurplus = 0.5 * (maxWillingPrice - currentPrice) * quantity;
 
-    // Push calculations to Bar Chart
     barChart.data.datasets[0].data = [Math.round(producerSurplus), Math.round(consumerSurplus)];
     barChart.update();
 
-    // 3. Projecting Price vs Access over 10 Years
     let priceData = [];
     for (let year = 1; year <= 10; year++) {
         if (state.patentActive) {
-            priceData.push(basePrice); // Monopoly price stays flat
+            priceData.push(basePrice); 
         } else {
-            // Simulate generics entering the market progressively up to the slider's max limit
             let activeCompetitorsInYear = 1 + ((state.competitors - 1) * (year / 10));
             let projectedPrice = basePrice * Math.pow(activeCompetitorsInYear, -0.75);
             priceData.push(projectedPrice.toFixed(2));
@@ -263,7 +297,50 @@ function updateCharts() {
     lineChart.update();
 }
 
-// --- 4. MAP INTERACTIVITY ---
+function updateSDChart() {
+    if(!state.chartsInitialized) return;
+
+    // Linear Economics Math
+    // D: P = (120 + demandShift) - 0.5Q
+    // S: P = (80 - supplyShift) + 0.5Q
+
+    const sShift = parseInt(document.getElementById('slider-supply-shift').value);
+    const dShift = parseInt(document.getElementById('slider-demand-shift').value);
+
+    // Calculate intercepts
+    const a = 120 + dShift; // Demand Y-intercept
+    const b = 0.5;          // Demand slope
+    const c = 80 - sShift;  // Supply Y-intercept
+    const d = 0.5;          // Supply slope
+
+    // Calculate Equilibrium where D = S
+    // a - bQ = c + dQ => Q = (a - c) / (b + d)
+    const eqQ = (a - c) / (b + d);
+    const eqP = a - (b * eqQ);
+
+    // Build data points for lines (from Q=0 to Q=200)
+    const supplyData = [
+        { x: 0, y: c },
+        { x: 200, y: c + (d * 200) }
+    ];
+
+    const demandData = [
+        { x: 0, y: a },
+        { x: 200, y: a - (b * 200) }
+    ];
+
+    // Update Chart.js
+    sdChart.data.datasets[0].data = supplyData;
+    sdChart.data.datasets[1].data = demandData;
+    sdChart.data.datasets[2].data = [{ x: eqQ, y: eqP }]; // The red equilibrium dot
+    sdChart.update();
+
+    // Update UI text
+    document.getElementById('eq-price').innerText = `$${eqP.toFixed(2)}`;
+    document.getElementById('eq-quantity').innerText = `${eqQ.toFixed(0)} Units`;
+}
+
+// --- 5. MAP INTERACTIVITY ---
 function toggleHotspot(id) {
     document.querySelectorAll('.hotspot-content').forEach(el => {
         el.style.display = 'none';

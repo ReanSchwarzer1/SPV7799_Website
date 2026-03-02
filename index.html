@@ -151,16 +151,16 @@
                     <div>
                         <strong class="text-scrollRed border-b border-blue-200 pb-1 block mb-2">1. The FDA Price Decay Curve</strong>
                         <p class="font-mono bg-white p-2 rounded border border-gray-200 mt-2 mb-3 font-bold text-center">P<sub>N</sub> = P<sub>0</sub> &times; N<sup>-0.75</sup></p>
-                        <p class="mb-2 text-gray-600">This interactive chart models price (P) based on the number of generic competitors (N). Real data shows that while a single generic barely moves the needle, having 6+ generic manufacturers drives the drug price down by roughly 80-90% from the monopoly baseline (P<sub>0</sub>).</p>
-                        <p class="text-xs mt-3 text-gray-500 font-mono">↳ Source: U.S. Food and Drug Administration (FDA). "Generic Competition and Drug Prices" (2019).</p>
+                        <p class="mb-2 text-gray-600">This models price (P) based on generic competitors (N). Real data shows that while a single generic barely moves the needle, having 6+ generic manufacturers drives the drug price down by roughly 80-90%.</p>
+                        <p class="text-xs mt-3 text-gray-500 font-mono">↳ Source: U.S. FDA. "Generic Competition and Drug Prices" (2019).</p>
                     </div>
                     <div>
                         <strong class="text-scrollRed border-b border-blue-200 pb-1 block mb-2">2. Welfare Distribution Models</strong>
                         <ul class="list-disc pl-4 mt-2 mb-3 space-y-2 text-gray-600">
-                            <li><strong>Private Profit (Producer Surplus):</strong><br> <span class="font-mono text-xs">(Price - Marginal Cost) &times; Quantity</span></li>
-                            <li><strong>Social Access (Consumer Surplus):</strong><br> <span class="font-mono text-xs">&frac12; &times; (Max Willing Price - Price) &times; Quantity</span></li>
+                            <li><strong>Producer Surplus:</strong> <span class="font-mono text-xs">(Price - MC) &times; Quantity</span></li>
+                            <li><strong>Consumer Surplus:</strong> <span class="font-mono text-xs">&frac12; &times; (Max Willing Price - Price) &times; Quantity</span></li>
                         </ul>
-                        <p class="text-gray-600">Using standard microeconomic linear demand curves, the model visualizes how revoking a patent shifts economic value from corporate monopoly profit directly into public health access (consumer surplus).</p>
+                        <p class="text-gray-600">Visualizes how revoking a patent shifts economic value from corporate monopoly profit directly into public health access.</p>
                         <p class="text-xs mt-3 text-gray-500 font-mono">↳ Source: Varian, H. R., "Microeconomic Analysis", W.W. Norton.</p>
                     </div>
                 </div>
@@ -168,7 +168,79 @@
         </section>
 
         <section class="mb-24">
-            <h3 class="text-3xl font-bold font-sans mb-2">4. Follow the Pill (Interactive Map)</h3>
+            <h3 class="text-3xl font-bold font-sans mb-2">4. The Microeconomics: Supply & Demand</h3>
+            <p class="text-lg font-serif text-gray-600 mb-8">Why do prices fall? It's not magic; it's market structure. Shift the determinants below to see how patent rejection increases supply, while public health programs increase demand.</p>
+            
+            <div class="bg-white border border-gray-200 shadow-xl rounded-xl overflow-hidden mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
+                    <div class="md:col-span-5 bg-brandGray p-6 border-r border-gray-200">
+                        <h4 class="font-bold text-lg mb-6 uppercase tracking-wide border-b pb-2">Determinants</h4>
+                        
+                        <div class="mb-8">
+                            <label class="block font-sans font-semibold mb-2 text-blue-700">
+                                Determinant of Supply: Competition
+                            </label>
+                            <p class="text-xs text-gray-600 mb-3 leading-tight">Revoking a patent or issuing a compulsory license lowers barriers to entry. More generic firms enter the market, shifting the Supply curve to the right.</p>
+                            <input type="range" id="slider-supply-shift" min="0" max="70" value="0" class="w-full accent-blue-600">
+                            <div class="flex justify-between text-xs font-bold mt-1 text-gray-500">
+                                <span>Monopoly (1 firm)</span>
+                                <span>Perfect Comp (50+ firms)</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block font-sans font-semibold mb-2 text-green-700">
+                                Determinant of Demand: Govt Procurement
+                            </label>
+                            <p class="text-xs text-gray-600 mb-3 leading-tight">Programs like India's PMBJP or global NGO bulk-buying increase accessibility, shifting the Demand curve to the right.</p>
+                            <input type="range" id="slider-demand-shift" min="0" max="40" value="0" class="w-full accent-green-600">
+                            <div class="flex justify-between text-xs font-bold mt-1 text-gray-500">
+                                <span>Private Out-of-Pocket</span>
+                                <span>Mass Public Distribution</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 p-4 bg-gray-100 rounded border border-gray-300">
+                            <h5 class="font-bold text-sm mb-2">Current Equilibrium</h5>
+                            <div class="flex justify-between text-sm font-mono mb-1">
+                                <span>Price (P*):</span> <span id="eq-price" class="font-bold text-scrollRed">$80.00</span>
+                            </div>
+                            <div class="flex justify-between text-sm font-mono">
+                                <span>Quantity (Q*):</span> <span id="eq-quantity" class="font-bold text-brandDark">40 Units</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="md:col-span-7 p-6 flex flex-col items-center justify-center bg-white">
+                        <div class="w-full h-80 relative">
+                            <canvas id="sdChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg text-sm text-gray-800 font-sans shadow-inner">
+                <h5 class="font-bold text-lg mb-4 uppercase tracking-wide text-brandDark">Microeconomic Modeling</h5>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <strong class="text-scrollRed border-b border-blue-200 pb-1 block mb-2">The Linear Equations</strong>
+                        <p class="mb-2 text-gray-600">This interactive graph uses standard inverse linear functions to plot the S&D curves:</p>
+                        <ul class="space-y-2 mt-2 font-mono text-xs bg-white p-3 border border-gray-200 rounded">
+                            <li><span class="text-blue-700 font-bold">Supply (S):</span> P = (c - &Delta;S) + dQ</li>
+                            <li><span class="text-green-700 font-bold">Demand (D):</span> P = (a + &Delta;D) - bQ</li>
+                            <li class="pt-2 border-t text-gray-500">Equilibrium: Q* = (a - c + &Delta;S + &Delta;D) / (b + d)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <strong class="text-scrollRed border-b border-blue-200 pb-1 block mb-2">Empirical Proof</strong>
+                        <p class="text-gray-600 mb-2">When India rejected pharmaceutical patents in the early 2000s, it caused a massive rightward shift in supply. Empirical studies show this competition eliminated monopoly deadweight loss and vastly expanded consumer welfare.</p>
+                        <p class="text-xs mt-2 text-gray-500 font-mono">↳ Source: Chaudhuri, S., Goldberg, P. K., & Jia, P. (2006). "Estimating the Effects of Global Patent Protection in Pharmaceuticals: A Case Study of Quinolones in India." <i>The American Economic Review</i>, 96(5), 1477-1514.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-24">
+            <h3 class="text-3xl font-bold font-sans mb-2">5. Follow the Pill (Interactive Map)</h3>
             <p class="text-lg font-serif text-gray-600 mb-8">Trace the geographical and economic journey of a generic drug across the Global South.</p>
             <div class="w-full h-[500px] bg-blue-50 rounded-xl relative shadow-inner overflow-hidden border-2 border-brandDark map-bg">
                 <svg class="absolute inset-0 w-full h-full pointer-events-none z-10" id="map-lines"></svg>
