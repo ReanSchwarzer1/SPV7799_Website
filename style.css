@@ -289,3 +289,77 @@ button[title="USA"], button[title="Africa"], button[title="Europe"] {
     background: #d92525;
     border-color: #f9fafb;
 }
+
+/* ==========================================================================
+   Game Theory Button States (Section 9)
+   ========================================================================== */
+.btn-strategy {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-strategy.selected {
+    background-color: #1a1a1a; 
+    color: #ffffff;
+    border-color: transparent;
+}
+
+.btn-strategy.selected:hover {
+    background-color: #000000;
+}
+
+.btn-strategy.selected .badge-cost {
+    background-color: #374151; 
+    color: #ffffff;
+}
+
+.btn-strategy.unselected {
+    background-color: #ffffff;
+    color: #1a1a1a; 
+    border-color: #1a1a1a;
+}
+
+.btn-strategy.unselected:hover {
+    background-color: #f3f4f6; 
+}
+
+.btn-strategy.unselected .badge-cost {
+    background-color: #e5e7eb; 
+    color: #1a1a1a;
+}
+
+/* ==========================================================================
+   Game Theory Button States (Section 9)
+   ========================================================================== */
+.btn-strategy {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-strategy.selected {
+    background-color: #1a1a1a; 
+    color: #ffffff;
+    border-color: transparent;
+}
+
+.btn-strategy.selected:hover {
+    background-color: #000000;
+}
+
+.btn-strategy.selected .badge-cost {
+    background-color: #374151; 
+    color: #ffffff;
+}
+
+.btn-strategy.unselected {
+    background-color: #ffffff;
+    color: #1a1a1a; 
+    border-color: #1a1a1a;
+}
+
+.btn-strategy.unselected:hover {
+    background-color: #f3f4f6; 
+}
+
+.btn-strategy.unselected .badge-cost {
+    background-color: #e5e7eb; 
+    color: #1a1a1a;
+}

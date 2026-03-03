@@ -1,4 +1,7 @@
 // --- STATE MANAGEMENT ---
+let invertedUChart, sCurveChart; 
+let barChart, lineChart, sdChart, qalyChart;
+
 let state = {
     synthesisRoute: 'patented',
     patentActive: true,
@@ -46,7 +49,6 @@ function setSynthesis(route) {
         cost.className = "text-5xl font-bold text-scrollRed font-mono transition-colors duration-300";
         state.patentActive = true; 
         
-        // BUG FIX: Consistently syncing the UI sliders
         if (compSlider) { compSlider.disabled = true; compSlider.value = 1; }
         if (compNote) { compNote.innerText = "Locked by Patent."; compNote.className = "text-xs text-red-500 mt-1 font-bold"; }
         if (statusLabel) { statusLabel.innerText = "ACTIVE"; statusLabel.className = "text-red-600 font-bold"; }
@@ -62,7 +64,6 @@ function setSynthesis(route) {
         cost.className = "text-5xl font-bold text-green-500 font-mono transition-colors duration-300";
         state.patentActive = false; 
         
-        // BUG FIX: Consistently syncing the UI sliders
         if (compSlider) { compSlider.disabled = false; compSlider.value = 15; }
         if (compNote) { compNote.innerText = "Market open! Adjust competitors."; compNote.className = "text-xs text-green-600 mt-1 font-bold"; }
         if (statusLabel) { statusLabel.innerText = "REJECTED / CL GRANTED"; statusLabel.className = "text-green-600 font-bold"; }
@@ -160,7 +161,6 @@ function renderCase() {
     document.getElementById('ruling-outcome').classList.add('hidden');
     state.patentActive = true; 
     
-    // BUG FIX: Reset sliders to Patented Monopoly state for new cases cleanly
     const compSlider = document.getElementById('slider-comp');
     const compNote = document.getElementById('comp-note');
     const statusLabel = document.getElementById('val-monopoly-status');
@@ -227,7 +227,6 @@ function makeRuling(isGrant) {
 }
 
 // --- 3, 4, 5. CHART.JS LOGIC WITH ARIA INJECTION ---
-let barChart, lineChart, sdChart, qalyChart;
 
 function updateCharts() {
     if(!state.chartsInitialized) return;
@@ -249,7 +248,6 @@ function updateCharts() {
     barChart.data.datasets[0].data = [Math.round(producerSurplus), Math.round(consumerSurplus)];
     barChart.update();
     
-    // ARIA Dynamic Injection
     document.getElementById('barChart').setAttribute('aria-label', `Value Distribution Chart. Producer Surplus is $${Math.round(producerSurplus).toLocaleString()}, and Consumer Surplus is $${Math.round(consumerSurplus).toLocaleString()}.`);
 
     let priceData = [];
@@ -265,7 +263,6 @@ function updateCharts() {
     lineChart.data.datasets[0].backgroundColor = state.patentActive ? 'rgba(217, 37, 37, 0.1)' : 'rgba(34, 197, 94, 0.1)';
     lineChart.update();
     
-    // ARIA Dynamic Injection
     document.getElementById('lineChart').setAttribute('aria-label', `Price Decay Chart over 10 years. Current Patent Status is ${state.patentActive ? 'Active Monopoly' : 'Rejected, allowing generic competition'}.`);
 }
 
@@ -284,7 +281,6 @@ function updateSDChart() {
     document.getElementById('eq-price').innerText = `$${eqP.toFixed(2)}`;
     document.getElementById('eq-quantity').innerText = `${eqQ.toFixed(0)} Units`;
     
-    // ARIA Dynamic Injection
     let economicAnalysis = (sShift === 0 && dShift === 0) ? "Market is in strict monopoly restricting access." : "Market shifted due to competitive supply or public demand.";
     document.getElementById('sdChart').setAttribute('aria-label', `Supply and Demand Chart. Current Equilibrium Price is $${eqP.toFixed(2)} and Quantity is ${eqQ.toFixed(0)} units. ${economicAnalysis}`);
 }
@@ -304,7 +300,6 @@ function updateQALYChart() {
     qalyChart.data.datasets[0].data = [patientsTreated, totalQALYs];
     qalyChart.update();
     
-    // ARIA Dynamic Injection
     let icerAnalysis = costPerPatient <= 5000 ? "This generic pricing is highly cost-effective." : "This monopoly pricing destroys life-years and is not cost-effective.";
     document.getElementById('qalyChart').setAttribute('aria-label', `Quality Adjusted Life Years Bar Chart. At a drug cost of $${costPerPatient.toLocaleString()} per patient, the $10 Million budget treats ${patientsTreated.toLocaleString()} patients, yielding ${totalQALYs.toLocaleString()} total QALYs gained. ${icerAnalysis}`);
 }
@@ -359,11 +354,12 @@ function updateMap() {
     if (year >= 2020) contextText = "India solidifies role as 'Pharmacy of the World' during COVID-19 and global supply shortages.";
 
     document.getElementById('export-volume').innerText = `$${exportVolume.toFixed(1)} Billion`;
-    document.getElementById('export-context').innerText = contextText;
+    
+    const exportContextEl = document.getElementById('export-context');
+    if (exportContextEl) exportContextEl.innerText = contextText;
 
-    // BUG FIX: Calculate Absolute Pixel Positions instead of invalid SVGs with "%" 
     const rect = svg.getBoundingClientRect();
-    const w = rect.width || 800; // Fallback width if missing
+    const w = rect.width || 800; 
     const h = rect.height || 550;
 
     const pt = (xPct, yPct) => `${(xPct / 100) * w} ${(yPct / 100) * h}`;
@@ -382,6 +378,27 @@ function updateMap() {
     }
     
     svg.innerHTML = paths;
+
+    // --- Update S-Curve Chart ---
+    if (sCurveChart) {
+        document.getElementById('scurve-year-display').innerText = year;
+        
+        // Epidemic-style transmission equation generating the logistic curve
+        let penetration = 100 / (1 + Math.exp(-0.4 * (year - 2010)));
+        
+        sCurveChart.data.datasets[1].data = [{x: year, y: penetration}];
+        sCurveChart.update();
+
+        let phaseText = "Pre-2005: High uncertainty and lack of complementary infrastructure constrain the diffusion of affordable generics.";
+        if (year >= 2005 && year <= 2015) {
+            phaseText = "Post-TRIPS Acceleration: Global NGO distribution networks (PEPFAR) act as complementary assets, triggering rapid epidemic-style diffusion.";
+        } else if (year > 2015) {
+            phaseText = "Approaching Saturation: The technology reaches the limits of current global absorptive capacity and infrastructure.";
+        }
+        
+        const phaseTextEl = document.getElementById('scurve-phase-text');
+        if (phaseTextEl) phaseTextEl.innerText = phaseText;
+    }
 }
 
 // --- 7. HUMAN METRIC: AFFORDABILITY & LERNER INDEX ---
@@ -501,7 +518,7 @@ function updateHHIWidget() {
     
     let hhi = 0;
     shares.forEach(s => {
-        hhi += Math.pow(s, 2);
+        hhi += Math.pow(s, 2); 
     });
     hhi = Math.round(hhi);
     
@@ -523,8 +540,24 @@ function updateHHIWidget() {
         badge.innerText = "Unconcentrated (Competitive)";
         badge.className = "text-sm font-bold tracking-widest uppercase py-1 px-3 rounded inline-block mt-2 bg-green-900 text-green-200 border border-green-500";
     }
-    
+
     renderHHIBlocks(shares);
+
+    if (!invertedUChart) return; 
+
+    // Mathematical representation of the Aghion Inverted-U curve
+    let currentN = numFirms;
+    let currentInnovation = 100 * (currentN/5) * Math.exp(1 - currentN/5);
+    
+    invertedUChart.data.datasets[1].data = [{x: currentN, y: currentInnovation}];
+    
+    // Change dot color based on where it is on the curve
+    let dotColor = '#d92525'; 
+    if (currentN >= 3 && currentN <= 8) dotColor = '#22c55e'; 
+    else if (currentN > 8) dotColor = '#eab308'; 
+    
+    invertedUChart.data.datasets[1].backgroundColor = dotColor;
+    invertedUChart.update();
 }
 
 function renderHHIBlocks(shares) {
@@ -546,10 +579,214 @@ function renderHHIBlocks(shares) {
     });
 }
 
-// --- GLOBAL INITIALIZATION (Merged Single Block) ---
+// --- 9. GAME THEORY PATENT RACE LOGIC ---
+// Moved to the global scope so inline HTML onclick handlers can find it
+function playPatentRace(userChoice) {
+    const cells = ['cell-high-high', 'cell-high-low', 'cell-low-high', 'cell-low-low'];
+    cells.forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.remove('bg-yellow-200', 'border-yellow-400', 'ring-4', 'ring-yellow-400', 'scale-105', 'z-10');
+        el.classList.add('bg-gray-50', 'border-gray-200');
+    });
+
+    // In this game model, a rational Firm B will ALWAYS play its dominant strategy: High R&D.
+    const rivalChoice = 'high'; 
+    let activeCellId = '';
+    let resultHTML = '';
+
+    if (userChoice === 'high') {
+        activeCellId = 'cell-high-high';
+        resultHTML = `
+            <strong class="text-scrollRed block mb-1">Result: Symmetric Over-Investment</strong>
+            You chose <strong>High R&D</strong> to try and capture the monopoly. However, because this is a dominant strategy, your rival <i>also</i> chose High R&D.<br><br>
+            You both spent $400M, giving you each a 50% chance at the $1000M patent. Your expected net profit is <strong>$100M</strong>. You both lost out on the $400M you could have made by cooperating on Low R&D.
+        `;
+        
+        document.getElementById('btn-play-high').classList.replace('unselected', 'selected');
+        document.getElementById('btn-play-low').classList.replace('selected', 'unselected');
+        
+    } else {
+        activeCellId = 'cell-low-high';
+        resultHTML = `
+            <strong class="text-scrollRed block mb-1">Result: The Sunk Cost Trap</strong>
+            You chose to save money with <strong>Low R&D</strong>. However, your rival played their dominant strategy (High R&D).<br><br>
+            Because they outspent you, they win the patent outright. They net <strong>$600M</strong>, while you lose your $100M investment and get nothing. This is why firms are forced to over-invest.
+        `;
+        
+        document.getElementById('btn-play-low').classList.replace('unselected', 'selected');
+        document.getElementById('btn-play-high').classList.replace('selected', 'unselected');
+    }
+
+    const targetCell = document.getElementById(activeCellId);
+    targetCell.classList.remove('bg-gray-50', 'border-gray-200');
+    targetCell.classList.add('bg-yellow-200', 'border-yellow-400', 'ring-4', 'ring-yellow-400', 'scale-105', 'z-10');
+
+    const resultBox = document.getElementById('game-result-box');
+    resultBox.innerHTML = resultHTML;
+    resultBox.classList.remove('hidden');
+}
+
+
+// --- GLOBAL INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", function() {
     initWebGLViewer();
     renderCase();
+
+    // 1. Initialize S-Curve Chart (Section 6)
+    const sCurveCtx = document.getElementById('sCurveChart').getContext('2d');
+    const sData = [];
+    for(let y=2000; y<=2024; y++) {
+        let penetration = 100 / (1 + Math.exp(-0.4 * (y - 2010)));
+        sData.push({x: y, y: penetration});
+    }
+
+    sCurveChart = new Chart(sCurveCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                {
+                    label: 'Diffusion Trajectory',
+                    data: sData,
+                    borderColor: '#3b82f6', // blue-500
+                    showLine: true,
+                    pointRadius: 0,
+                    borderWidth: 3,
+                    tension: 0.4
+                },
+                {
+                    label: 'Current Year',
+                    data: [{x: 2000, y: 100 / (1 + Math.exp(-0.4 * (2000 - 2010)))}],
+                    backgroundColor: '#d92525',
+                    borderColor: '#fffb00',
+                    borderWidth: 2,
+                    pointRadius: 8,
+                    pointHoverRadius: 12
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(26, 26, 26, 0.95)',
+                    titleFont: { size: 14, family: "'Work Sans', sans-serif" },
+                    bodyFont: { size: 12, family: "monospace" },
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            if (context.datasetIndex === 0) return null;
+                            let y = context.parsed.x;
+                            let phase = y < 2005 ? "Slow Initial Uptake" : (y <= 2015 ? "Rapid Acceleration" : "Approaching Saturation");
+                            return [`Year: ${y}`, `Penetration: ${context.parsed.y.toFixed(1)}%`, `Phase: ${phase}`];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { 
+                    type: 'linear', 
+                    title: { display: false }, 
+                    min: 2000, 
+                    max: 2024,
+                    grid: { display: false },
+                    ticks: { callback: function(value) { return value; } }
+                },
+                y: { 
+                    type: 'linear', 
+                    title: { display: false }, 
+                    min: 0, 
+                    max: 105,
+                    ticks: { display: false },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // 2. Initialize Inverted-U Chart (Section 8)
+    const invUCtx = document.getElementById('invertedUChart').getContext('2d');
+    const uCurveData = [];
+    for(let n=1; n<=15; n+=0.5) {
+        let innovation = 100 * (n/5) * Math.exp(1 - n/5);
+        uCurveData.push({x: n, y: innovation});
+    }
+
+    invertedUChart = new Chart(invUCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                {
+                    label: 'Theoretical Innovation Curve',
+                    data: uCurveData,
+                    borderColor: '#9ca3af', 
+                    showLine: true,
+                    pointRadius: 0,
+                    borderDash: [5, 5],
+                    tension: 0.4
+                },
+                {
+                    label: 'Current Market State',
+                    data: [], 
+                    backgroundColor: '#d92525',
+                    borderColor: '#fffb00',
+                    borderWidth: 2,
+                    pointRadius: 8,
+                    pointHoverRadius: 12
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(26, 26, 26, 0.95)',
+                    titleFont: { size: 14, family: "'Work Sans', sans-serif" },
+                    bodyFont: { size: 12, family: "monospace" },
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            if (context.datasetIndex === 0) return null;
+                            const firms = context.parsed.x;
+                            let analysis = "";
+                            if (firms <= 2) analysis = "Low Innovation: Arrow's 'Replacement Effect' causes complacency.";
+                            else if (firms >= 3 && firms <= 8) analysis = "High Innovation: Aghion's 'Escape-Competition Effect' drives R&D.";
+                            else analysis = "Low Innovation: Schumpeterian Effect erodes profits needed to fund R&D.";
+                            
+                            return [
+                                `Firms: ${firms}`,
+                                `Innovation Intensity: ${context.parsed.y.toFixed(0)}%`,
+                                `--------------------------------`,
+                                analysis
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { 
+                    type: 'linear',
+                    title: { display: true, text: 'Degree of Competition (Number of Firms)' }, 
+                    min: 1, 
+                    max: 15,
+                    grid: { display: false }
+                },
+                y: { 
+                    type: 'linear',
+                    title: { display: false }, 
+                    min: 0, 
+                    max: 110,
+                    ticks: { display: false },
+                    grid: { display: false }
+                }
+            }
+        }
+    });
 
     const barCtx = document.getElementById('barChart').getContext('2d');
     const lineCtx = document.getElementById('lineChart').getContext('2d');
@@ -691,7 +928,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('select-wage-profile').addEventListener('change', updateAffordabilityWidget);
     document.getElementById('slider-hhi-firms').addEventListener('input', updateHHIWidget);
     
-    // BUG FIX: Resize map dynamically if the window scales, keeping nodes and paths matched
     window.addEventListener('resize', () => {
         if (state.chartsInitialized) updateMap();
     });
