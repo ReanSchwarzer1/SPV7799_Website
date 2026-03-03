@@ -111,9 +111,9 @@
             </div>
         </section>
 
-        <section class="mb-24">
-            <h3 class="text-3xl font-bold font-sans mb-2">3. The Macro-Economics</h3>
-            <p class="text-lg font-serif text-gray-600 mb-8">Watch how the synthesis routes and legal rulings from above dictate market forces.</p>
+        <section class="mb-24" id="macro-economics">
+            <h3 class="text-3xl font-bold font-sans mb-2">3. The Macro-Economics & Social Returns</h3>
+            <p class="text-lg font-serif text-gray-600 mb-8">Watch how the synthesis routes and legal rulings from above dictate market forces, and how they bridge the gap between private profit and social welfare.</p>
             <div class="bg-white border border-gray-200 shadow-xl rounded-xl overflow-hidden mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
                     <div class="md:col-span-4 bg-brandGray p-6 border-r border-gray-200">
@@ -158,21 +158,37 @@
 
             <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg text-sm text-gray-800 font-sans shadow-inner">
                 <h5 class="font-bold text-lg mb-4 uppercase tracking-wide text-brandDark">Economic Methodology & Real Data</h5>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <strong class="text-scrollRed border-b border-blue-200 pb-1 block mb-2">1. The FDA Price Decay Curve</strong>
-                        <p class="font-mono bg-white p-2 rounded border border-gray-200 mt-2 mb-3 font-bold text-center">P<sub>N</sub> = P<sub>0</sub> &times; N<sup>-0.75</sup></p>
-                        <p class="mb-2 text-gray-600">This models price (P) based on generic competitors (N). Real data shows that while a single generic barely moves the needle, having 6+ generic manufacturers drives the drug price down by roughly 80-90%.</p>
-                        <p class="text-xs mt-3 text-gray-500 font-mono">↳ Source: U.S. FDA. "Generic Competition and Drug Prices" (2019).</p>
+                        <div class="bg-white p-2 border border-gray-200 rounded mt-2 mb-2 text-center">
+                            <span class="font-mono font-bold text-sm">P<sub>N</sub> = P<sub>0</sub> &times; N<sup>-0.75</sup></span>
+                        </div>
+                        <ul class="space-y-1 text-xs text-gray-600 list-disc pl-4">
+                            <li>This models price (P) based on generic competitors (N).</li>
+                            <li>Real data shows that while a single generic barely moves the needle, having 6+ generic manufacturers drives the drug price down by roughly 80-90%.</li>
+                        </ul>
+                        <p class="text-[10px] mt-3 text-gray-500 font-mono">↳ Source: U.S. FDA. "Generic Competition and Drug Prices" (2019).</p>
                     </div>
                     <div>
                         <strong class="text-scrollRed border-b border-blue-200 pb-1 block mb-2">2. Welfare Distribution Models</strong>
-                        <ul class="list-disc pl-4 mt-2 mb-3 space-y-2 text-gray-600">
-                            <li><strong>Producer Surplus:</strong> <span class="font-mono text-xs">(Price - MC) &times; Quantity</span></li>
-                            <li><strong>Consumer Surplus:</strong> <span class="font-mono text-xs">&frac12; &times; (Max Willing Price - Price) &times; Quantity</span></li>
+                        <ul class="list-disc pl-4 mt-2 mb-3 space-y-2 text-xs text-gray-600">
+                            <li><strong>Private Returns (Producer Surplus):</strong> <span class="font-mono">(Price - MC) &times; Quantity</span></li>
+                            <li><strong>Consumers' Surplus:</strong> <span class="font-mono">&frac12; &times; (Max Willing Price - P) &times; Q</span></li>
                         </ul>
-                        <p class="text-gray-600">Visualizes how revoking a patent shifts economic value from corporate monopoly profit directly into public health access.</p>
-                        <p class="text-xs mt-3 text-gray-500 font-mono">↳ Source: Varian, H. R., "Microeconomic Analysis", W.W. Norton.</p>
+                        <p class="text-gray-600 text-xs mb-2">Visualizes how revoking a patent shifts economic value from corporate monopoly profit directly into public health access (Source: Ch 5.4).</p>
+                        <p class="text-[10px] mt-1 text-gray-500 font-mono">↳ Source: Varian, H. R., "Microeconomic Analysis".</p>
+                    </div>
+                    <div>
+                        <strong class="text-scrollRed border-b border-blue-200 pb-1 block mb-2">3. The Appropriability Problem</strong>
+                        <div class="bg-white p-2 border border-gray-200 rounded mt-2 mb-2 text-center flex flex-col justify-center">
+                            <span class="font-mono font-bold text-[11px] leading-tight text-brandDark">Social returns = Private returns +<br>Impacts on rivals, other users, citizens</span>
+                        </div>
+                        <ul class="space-y-2 text-xs text-gray-600 list-disc pl-4">
+                            <li>Knowledge is partially non-rival and imperfectly excludable, creating an "appropriability problem" (Source: Ch 1.6 & 5.2).</li>
+                            <li>The Indian generic industry functions as a mechanism to maximize the <strong>social returns</strong> of a molecule by rapidly expanding global consumer surplus once the innovator's initial private returns are extracted.</li>
+                        </ul>
+                        <p class="text-[10px] mt-2 text-gray-500 font-mono">↳ Source: Course Notes, "Private and Social Returns to Innovation" (Ch 5.1).</p>
                     </div>
                 </div>
             </div>
@@ -486,7 +502,7 @@
 
         <section class="mb-24" id="antitrust-hhi">
             <h3 class="text-3xl font-bold font-sans mb-2">8. Antitrust Policy & Innovation: The Inverted-U</h3>
-            <p class="text-lg font-serif text-gray-600 mb-8">How does a government legally prove a company has "too much" power? Regulators calculate market concentration using the <strong>Herfindahl-Hirschman Index (HHI)</strong>. But concentration isn't just about price—it also drives the <strong>incentive to innovate</strong>. Adjust the slider to see how market structure dictates both pricing power and R&D effort.</p>
+            <p class="text-lg font-serif text-gray-600 mb-8">How does a government legally prove a company has "too much" power? Regulators calculate market concentration using the <strong>Herfindahl-Hirschman Index (HHI)</strong>. But concentration isn't just about price, but it also drives the <strong>incentive to innovate</strong>. Adjust the slider to see how market structure dictates both pricing power and R&D effort.</p>
             
             <div class="bg-white border border-gray-200 shadow-xl rounded-xl overflow-hidden mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-0">
