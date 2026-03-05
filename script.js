@@ -89,7 +89,7 @@ const legalCases = [
         rejectAction: "Apply Antitrust / Fine",
         resultReject: "Correct. The Competition Commission of India (CCI) penalizes 'refusal to deal' tactics. The artificial monopoly is broken, allowing generic manufacturers (like IPCA) to supply the market at ~$0.10 per pill.",
         resultGrant: "Incorrect. Allowing closed distribution loopholes results in catastrophic price hikes (from $13.50 to $750/pill) for essential, off-patent medicines.",
-        citation: "Real Case: FTC v. Vyera Pharmaceuticals, LLC (2022). US regulators eventually sued to stop this exact scheme, but the loophole delayed generic entry for years."
+        citation: `Real Case: <a href="https://www.ftc.gov/legal-library/browse/cases-proceedings/161-0001-vyera-pharmaceuticals-llc" target="_blank" rel="noopener" class="text-blue-600 underline hover:text-blue-800">FTC v. Vyera Pharmaceuticals, LLC (2022)</a>. US regulators eventually sued to stop this exact scheme, but the loophole delayed generic entry for years.`
     },
     {
         title: "Novartis AG vs. Union of India",
@@ -99,7 +99,7 @@ const legalCases = [
         rejectAction: "Apply Sec 3(d)",
         resultReject: "Correct. The Supreme Court rejected the patent in 2013 under Section 3(d). The generic market remained open, dropping patient costs from ~$2,666/month down to ~$177/month.",
         resultGrant: "Incorrect in reality. Granting this would have allowed 'evergreening' and locked out affordable Indian generics.",
-        citation: "Citation: Novartis AG v. Union of India, Supreme Court of India (2013)."
+        citation: `Citation: <a href="https://indiankanoon.org/doc/165776436/" target="_blank" rel="noopener" class="text-blue-600 underline hover:text-blue-800">Novartis AG v. Union of India, Supreme Court of India (2013)</a>. Also see: <a href="https://www.ipindia.gov.in/writereaddata/Portal/IPOAct/1_113_1_The_Patents_Act__1970___incorporating_all_amendments_till_1-08-2024.pdf" target="_blank" rel="noopener" class="text-blue-600 underline hover:text-blue-800">India Patents Act §3(d) (Official Text)</a>.`
     },
     {
         title: "Bayer Corp. vs. Natco Pharma",
@@ -109,7 +109,7 @@ const legalCases = [
         rejectAction: "Grant Compulsory License",
         resultReject: "Correct. In 2012, India granted its first CL to Natco. Natco sold the generic for ₹8,800/month (a 97% price drop) while paying Bayer a 6% royalty.",
         resultGrant: "If denied, 99% of Indian patients requiring this life-saving drug would have been entirely priced out.",
-        citation: "Citation: Bayer Corp. v. Union of India, Controller of Patents (2012)."
+        citation: `Citation: <a href="https://indiankanoon.org/doc/28519340/" target="_blank" rel="noopener" class="text-blue-600 underline hover:text-blue-800">Bayer Corp. v. Union of India (IPAB, 2012 / Bombay HC, 2014)</a>. Full IPAB ruling: <a href="https://unctad.org/ippcaselaw/sites/default/files/ippcaselaw/2020-12/Bayer%20Corporation%20Vs.%20Union%20of%20India%20and%20Others%20IPAB%202013.pdf" target="_blank" rel="noopener" class="text-blue-600 underline hover:text-blue-800">UNCTAD PDF</a>.`
     },
     {
         title: "F. Hoffmann-La Roche Ltd. vs. Cipla",
@@ -119,7 +119,7 @@ const legalCases = [
         rejectAction: "Deny Injunction",
         resultReject: "Correct. The Delhi High Court denied the injunction in 2009. Roche's drug cost Rs 4,800/pill, while Cipla's generic cost Rs 1,600/pill. The court prioritized public access to life-saving drugs over IP enforcement.",
         resultGrant: "Granting the injunction would have prioritized intellectual property over immediate public health access.",
-        citation: "Citation: F. Hoffmann-La Roche Ltd. v. Cipla Ltd., Delhi High Court (2009)."
+        citation: `Citation: <a href="https://indiankanoon.org/doc/131401110/" target="_blank" rel="noopener" class="text-blue-600 underline hover:text-blue-800">F. Hoffmann-La Roche Ltd. v. Cipla Ltd., Delhi High Court (2009)</a>. FAO (OS) 188/2008.`
     },
     {
         title: "Gilead Sciences vs. Generic Manufacturers",
@@ -129,7 +129,7 @@ const legalCases = [
         rejectAction: "Intervene / Force Market Open",
         resultReject: "Correct. Following patent oppositions, Gilead issued voluntary licenses to 11 Indian manufacturers. The US price was $84,000/course; the generic Indian price dropped to ~$300-$900/course for 101 developing nations.",
         resultGrant: "A strict monopoly without voluntary licensing would have severely restricted global Hep C eradication.",
-        citation: "Data Source: Hill A. et al., 'Rapid reductions in prices for generic sofosbuvir...', PMC4946692 (2016)."
+        citation: `Data Source: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4946692/" target="_blank" rel="noopener" class="text-blue-600 underline hover:text-blue-800">Hill A. et al., 'Rapid reductions in prices for generic sofosbuvir and daclatasvir...', PMC4946692 (2016)</a>. Open access.`
     },
     {
         title: "Pfizer vs. Generic Challengers",
@@ -139,7 +139,7 @@ const legalCases = [
         rejectAction: "Revoke Patent",
         resultReject: "Correct. The Indian Patent Office revoked the patent in 2012 for lacking an inventive step. Pfizer's price was Rs 1.96 lakh/course; Cipla offered generics at a fraction of the cost.",
         resultGrant: "Upholding weak, structurally obvious patents stifles the 'Alternative Synthesis' ecosystem.",
-        citation: "Citation: Post-grant opposition by Cipla/Natco against Patent IN209251 (2012)."
+        citation: `Citation: Post-grant opposition by Cipla/Natco against Patent IN209251 (2012). See also: <a href="https://ipindia.gov.in/" target="_blank" rel="noopener" class="text-blue-600 underline hover:text-blue-800">Indian Patent Office (IP India)</a>.`
     }
 ];
 
@@ -155,7 +155,7 @@ function renderCase() {
     document.getElementById('case-drug').innerText = `Drug: ${c.drug}`;
     document.getElementById('case-claim').innerText = `"${c.claim}"`;
     document.getElementById('case-context').innerText = `Context: ${c.context}`;
-    document.getElementById('case-citation').innerText = c.citation;
+    document.getElementById('case-citation').innerHTML = c.citation;
     document.getElementById('btn-reject').innerText = c.rejectAction;
     
     document.getElementById('ruling-outcome').classList.add('hidden');
@@ -310,7 +310,7 @@ const historicalExportData = {
     2005: 4.2, 2006: 5.0, 2007: 6.1, 2008: 7.2, 2009: 8.5,
     2010: 9.8, 2011: 11.2, 2012: 13.0, 2013: 14.6, 2014: 15.2,
     2015: 16.4, 2016: 16.8, 2017: 17.3, 2018: 19.1, 2019: 20.6,
-    2020: 24.4, 2021: 24.6, 2022: 25.3, 2023: 27.9, 2024: 28.5
+    2020: 24.4, 2021: 24.6, 2022: 25.3, 2023: 27.9, 2024: 30.5
 };
 
 const regionalData = {
@@ -506,7 +506,7 @@ function updateHHIWidget() {
     if (numFirms === 1) {
         shares.push(100);
     } else {
-        const originatorShare = Math.max(20, 100 - (numFirms * 8)); 
+        const originatorShare = Math.max(5, 100 - (numFirms * 7));
         shares.push(originatorShare);
         
         const remainingShare = 100 - originatorShare;
