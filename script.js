@@ -570,9 +570,12 @@ function renderHHIBlocks(shares) {
         block.style.height = '100%';
         block.className = `flex flex-col justify-center items-center border-r border-white transition-all duration-500 overflow-hidden ${index === 0 ? 'bg-brandDark text-white' : 'bg-gray-300 text-brandDark'}`;
         
-        if (share > 5) {
-            block.innerHTML = `<span class="font-bold text-lg">${Math.round(share)}%</span>
-                               <span class="text-[10px] uppercase font-mono tracking-tighter opacity-70">${index === 0 ? 'Originator' : 'Generic'}</span>`;
+        // BUG FIX: Only render text if the segment is wide enough to hold it on mobile screens
+        if (share > 10) {
+            block.innerHTML = `<span class="font-bold text-xs sm:text-sm md:text-lg">${Math.round(share)}%</span>
+                               <span class="text-[8px] md:text-[10px] uppercase font-mono tracking-tighter opacity-70 hidden sm:inline">${index === 0 ? 'Originator' : 'Generic'}</span>`;
+        } else if (share > 5) {
+            block.innerHTML = `<span class="font-bold text-[10px] sm:text-xs">${Math.round(share)}%</span>`;
         }
         
         container.appendChild(block);
