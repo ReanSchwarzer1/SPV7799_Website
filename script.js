@@ -17,8 +17,8 @@ function initWebGLViewer() {
     let container = document.getElementById("molecule-container");
     glViewer = $3Dmol.createViewer(container, { backgroundColor: "transparent" });
 
-    // CID 4993 is Pyrimethamine (Daraprim)
-    $3Dmol.download("cid:4993", glViewer, { onAll: function() {
+    // CID 5291 is Imanitib (Gleevac)
+    $3Dmol.download("cid:5291", glViewer, { onAll: function() {
         // Default to the expensive/monopoly red visualization
         glViewer.setStyle({}, {stick: {radius: 0.15, colorscheme: 'redCarbon'}});
         glViewer.zoomTo();
@@ -45,7 +45,7 @@ function setSynthesis(route) {
     if(route === 'patented') {
         btnPat.classList.remove('border-transparent');
         btnPat.classList.add('border-brandDark', 'bg-white');
-        cost.innerText = "$750.00"; 
+        cost.innerText = "$179.93"; 
         cost.className = "text-5xl font-bold text-scrollRed font-mono transition-colors duration-300";
         state.patentActive = true; 
         
@@ -60,7 +60,7 @@ function setSynthesis(route) {
     } else {
         btnAlt.classList.remove('border-transparent');
         btnAlt.classList.add('border-brandDark', 'bg-white');
-        cost.innerText = "$0.10"; 
+        cost.innerText = "~$1.50"; 
         cost.className = "text-5xl font-bold text-green-500 font-mono transition-colors duration-300";
         state.patentActive = false; 
         
@@ -93,7 +93,7 @@ const legalCases = [
     },
     {
         title: "Novartis AG vs. Union of India",
-        drug: "Imatinib Mesylate (Glivec) - Leukemia",
+        drug: "Imatinib Mesylate (Gleevac) - Leukemia",
         claim: "We have developed a beta-crystalline form of our existing drug, imatinib. It has better flow properties and thermodynamic stability. We request a patent.",
         context: "Section 3(d) of the 1970 Patent Act prevents 'evergreening'—patenting minor tweaks to existing drugs without significantly enhanced therapeutic efficacy.",
         rejectAction: "Apply Sec 3(d)",

@@ -36,12 +36,12 @@
     <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         
         <section class="mb-16 sm:mb-24" id="molecular-storyteller">
-            <h3 class="text-2xl sm:text-3xl font-bold font-sans mb-4">1. The Molecular Scrollyteller: The Daraprim Paradox</h3>
+            <h3 class="text-2xl sm:text-3xl font-bold font-sans mb-4">1. The Molecular Scrollyteller: The Gleevac</h3>
             <div class="bg-brandDark text-white p-4 sm:p-8 rounded-xl shadow-2xl relative overflow-hidden flex flex-col md:flex-row gap-6 sm:gap-8 items-center mt-4">
                 <div class="relative z-10 w-full md:w-1/2">
                     <h4 class="text-xl sm:text-2xl font-bold font-sans mb-2 text-voxYellow">The Synthesis Puzzle</h4>
-                    <p class="font-serif text-base sm:text-lg mb-4 text-gray-300">The chemical formula for Pyrimethamine (brand name Daraprim) is <span class="font-mono bg-gray-800 p-1 rounded border border-gray-600">C<sub>12</sub>H<sub>13</sub>ClN<sub>4</sub></span>. It is an essential antiparasitic drug used to treat toxoplasmosis.</p>
-                    <p class="font-serif text-sm mb-6 text-gray-400">In 2015, Turing Pharmaceuticals acquired the US marketing rights and exploited closed distribution loopholes to artificially monopolize the market, hiking the price overnight by over 5,400%. Meanwhile, Indian generic manufacturers continued synthesizing the exact same molecule for pennies.</p>
+                    <p class="font-serif text-base sm:text-lg mb-4 text-gray-300">The chemical formula for Imanitib (brand name Gleevac) is <span class="font-mono bg-gray-800 p-1 rounded border border-gray-600">C<sub>29</sub>H<sub>31</sub>N<sub>7</sub>O</span>. It is used for treatment of chronic myelogenous leukemia and gastrointestinal stromal tumours. It has a role as an antineoplastic agent, a tyrosine kinase inhibitor and an apoptosis inducer.</p>
+                    <p class="font-serif text-sm mb-6 text-gray-400">Following its launch in 2001, Novartis aggressively protected its patent and continually raised the drug's price in the US market. In a landmark 2013 ruling, the Indian Supreme Court denied Novartis a renewed patent for the drug, preventing the "evergreening" of its exclusivity. This historic decision allowed Indian pharmaceutical companies to continue synthesizing generic versions of the life-saving molecule for a fraction of the global price.</p>
                     
                     <div class="bg-white text-brandDark p-4 sm:p-6 rounded-lg mt-6">
                         <h5 class="font-bold uppercase tracking-wide text-xs sm:text-sm mb-4">Select Market Environment</h5>
@@ -51,23 +51,23 @@
                         </div>
                         <div class="mt-6 flex flex-col sm:flex-row justify-between items-center sm:items-end border-t border-gray-300 pt-4 gap-2">
                             <span class="font-serif font-bold text-base sm:text-lg">Cost Per Pill:</span>
-                            <span id="api-cost" class="text-4xl sm:text-5xl font-bold text-scrollRed font-mono">$750.00</span>
+                            <span id="api-cost" class="text-4xl sm:text-5xl font-bold text-scrollRed font-mono">$179.93</span>
                         </div>
                     </div>
                     
                     <div class="mt-6 bg-gray-900 p-4 rounded-lg border border-gray-700 shadow-inner">
                         <h5 class="font-bold text-[10px] sm:text-xs uppercase tracking-widest text-gray-500 mb-3">Real Data & Citations</h5>
                         <ul class="text-[10px] sm:text-xs font-mono text-gray-400 space-y-2">
-                            <li>↳ <strong class="text-gray-200">Molecule:</strong> Pyrimethamine (<a href="https://pubchem.ncbi.nlm.nih.gov/compound/4993" target="_blank" rel="noopener" class="text-blue-400 underline hover:text-blue-300">PubChem CID: 4993</a>).</li>
-                            <li>↳ <strong class="text-gray-200">US Price Data:</strong> Turing Pharmaceuticals hiked the price from $13.50 to $750/pill in August 2015. (<a href="https://www.ftc.gov/legal-library/browse/cases-proceedings/161-0001-vyera-pharmaceuticals-llc" target="_blank" rel="noopener" class="text-blue-400 underline hover:text-blue-300">FTC Case</a>)</li>
-                            <li>↳ <strong class="text-gray-200">Generic Price Data:</strong> Indian formulations retailed globally at ~₹3-10 ($0.04 - $0.15) per pill during the same period.</li>
+                            <li>↳ <strong class="text-gray-200">Molecule:</strong> Imanitib (<a href="https://pubchem.ncbi.nlm.nih.gov/compound/Imatinib" target="_blank" rel="noopener" class="text-blue-400 underline hover:text-blue-300">PubChem CID: 5291</a>).</li>
+                            <li>↳ <strong class="text-gray-200">US Price Data:</strong> Novartis continually hiked the price in the US, with a single pill rising from $92.74 in 2010 to $179.93 by 2014. (<a href="https://www.biopharmadive.com/news/old-novartis-cancer-flagship-gleevec-heads-to-pharmacies-as-lower-cost-gene/413259/" target="_blank" rel="noopener" class="text-blue-400 underline hover:text-blue-300">Biopharmadive</a>)</li>
+                            <li>↳ <strong class="text-gray-200">Generic Price Data:</strong> During the 2013 Supreme Court case, Indian generic equivalents cost around ₹8,000–12,000 ($160–$240) for a monthly dose. Today, Indian generics like Natco's Veenat retail locally for as little as ₹125 (~$1.50) per 400mg pill. (<a href="https://www.asianscientist.com/2013/04/features/novartis-loses-historic-india-patent-case-cancer-drug-glivec-2013/" target="_blank" rel="noopener" class="text-blue-400 underline hover:text-blue-300">Asianscientist</a>)</li>
                         </ul>
                     </div>
                 </div>
                 <div class="w-full md:w-1/2 molecule-bg h-full min-h-[300px] md:min-h-[450px] rounded-lg border border-gray-700 relative cursor-move shadow-inner">
                     <div id="molecule-container" class="absolute inset-0 w-full h-full z-10"></div>
                     <div class="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 text-gray-300 font-sans text-[10px] sm:text-xs z-20 bg-black bg-opacity-60 px-2 sm:px-3 py-1 sm:py-2 rounded shadow">
-                        Drag to rotate Pyrimethamine 3D Model
+                        Drag to rotate Imanitib 3D Model
                     </div>
                 </div>
             </div>
