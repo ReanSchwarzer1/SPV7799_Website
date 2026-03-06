@@ -363,3 +363,28 @@ button[title="USA"], button[title="Africa"], button[title="Europe"] {
     background-color: #e5e7eb; 
     color: #1a1a1a;
 }
+
+/* Ensure Section 10 header follows normal casing */
+#oecd-benchmarks h3 {
+    text-transform: none !important;
+}
+
+/* Style for the new source block list markers */
+.text-scrollRed {
+    color: #d92525; /* Match your brand red */
+}
+
+/* Standardizing the Section 10 Card */
+.article-card {
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.article-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08); /* Matches your project shadow style */
+}
+
+/* Ensure font casing is correct */
+#oecd-benchmarks h3 {
+    text-transform: none;
+}

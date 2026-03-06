@@ -689,6 +689,57 @@
                 </div>
             </div>
         </section>
+
+        <section class="mb-16 sm:mb-24 article-card p-6 sm:p-10 rounded-2xl bg-white border border-gray-100 transition-all duration-300 hover:shadow-2xl" id="oecd-benchmarks">
+    <h3 class="text-2xl sm:text-4xl font-bold font-sans mb-6 tracking-tight border-b-2 border-black pb-4">
+        10. Global Benchmarks: The Generic Paradox
+    </h3>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+        <div class="lg:col-span-7">
+            <p class="text-base sm:text-lg font-serif text-gray-700 leading-relaxed mb-6">
+                Data from the <strong>OECD Health at a Glance 2023</strong> reveals a striking "Generic Paradox." In countries like <strong>Germany</strong>, generics account for over <strong>80.3%</strong> of prescriptions by volume, yet represent only <strong>15.5%</strong> of total pharmaceutical spending. This demonstrates the massive fiscal relief generic manufacturers (largely supplied by India) provide to national health budgets.
+            </p>
+            
+            <div class="inline-flex items-center space-x-2 bg-gray-100 px-3 py-1 rounded-full border border-gray-200 mb-6">
+                <span class="w-2 h-2 rounded-full bg-scrollRed"></span>
+                <span class="text-[10px] font-mono uppercase tracking-widest text-gray-500">Source: OECD Health Statistics 2023 / g9-7.csv</span>
+            </div>
+        </div>
+
+        <div class="lg:col-span-5 bg-gray-50 p-4 rounded-xl border border-gray-200 shadow-inner">
+            <h4 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 text-center">Verified CSV Data (2021)</h4>
+            <table class="w-full text-[11px] font-mono leading-tight">
+                <thead>
+                    <tr class="border-b border-gray-300">
+                        <th class="pb-2 text-left">Country</th>
+                        <th class="pb-2 text-right">Volume</th>
+                        <th class="pb-2 text-right">Value</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-600">
+                    <tr><td class="pt-2">Chile</td><td class="text-right">82.3%</td><td class="text-right font-bold text-scrollRed">67.2%</td></tr>
+                    <tr><td>Germany</td><td class="text-right">80.3%</td><td class="text-right font-bold text-scrollRed">15.5%</td></tr>
+                    <tr><td>United Kingdom</td><td class="text-right">78.4%</td><td class="text-right font-bold text-scrollRed">34.3%</td></tr>
+                    <tr><td>OECD Average</td><td class="text-right">52.3%</td><td class="text-right font-bold text-scrollRed">24.5%</td></tr>
+                    <tr><td>Switzerland</td><td class="text-right">22.1%</td><td class="text-right font-bold text-scrollRed">14.1%</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="bg-white border border-gray-100 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+        <h5 class="text-center font-bold text-xs uppercase tracking-widest mb-6 text-gray-400 font-sans">OECD Market Share Comparison</h5>
+        <div class="h-80 w-full">
+            <canvas id="comparisonChart"></canvas>
+        </div>
+    </div>
+
+    <footer class="mt-8 pt-6 border-t border-gray-100 text-[10px] text-gray-400 font-serif italic">
+        OECD (2023), "Generics and biosimilars", in Health at a Glance 2023: OECD Indicators, OECD Publishing, Paris. 
+        Data derived from the accompanying dataset (w74906.xlsx) specifically sheet g9-7.
+    </footer>
+</section>
     </main>
 
     <script src="script.js"></script>

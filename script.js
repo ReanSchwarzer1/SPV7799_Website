@@ -12,7 +12,7 @@ let state = {
 
 let glViewer = null;
 
-// --- 1. SYNTHESIS LOGIC & WEBGL MOLECULE (DARAPRIM) ---
+// --- 1. SYNTHESIS LOGIC & WEBGL MOLECULE (Gleevac) ---
 function initWebGLViewer() {
     let container = document.getElementById("molecule-container");
     glViewer = $3Dmol.createViewer(container, { backgroundColor: "transparent" });
@@ -790,6 +790,53 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
     });
+
+    // 3. Initialize OECD Comparison Chart (Section 10)
+    // Verification: Data sourced from w74906.xlsx (OECD Health Statistics 2023)
+const oecdLabels = ['Chile', 'Germany', 'UK', 'USA', 'Japan', 'OECD Avg', 'Switzerland'];
+const volumeData = [82.3, 80.3, 78.4, 91.0, 47.7, 52.3, 22.1];
+const valueData = [67.2, 15.5, 34.3, 18.0, 15.4, 24.5, 14.1];
+
+const compCtx = document.getElementById('comparisonChart').getContext('2d');
+new Chart(compCtx, {
+    type: 'bar',
+    data: {
+        labels: oecdLabels,
+        datasets: [
+            {
+                label: 'Share by Volume (%)',
+                data: volumeData,
+                backgroundColor: '#d92525', // Brand Red
+                borderRadius: 4
+            },
+            {
+                label: 'Share by Value (%)',
+                data: valueData,
+                backgroundColor: '#94a3b8', // Slate Gray
+                borderRadius: 4
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    footer: (items) => 'Source: OECD Health Statistics 2023'
+                }
+            },
+            legend: { position: 'bottom' }
+        },
+        scales: {
+            y: { 
+                beginAtZero: true, 
+                max: 100,
+                title: { display: true, text: 'Percentage (%)' }
+            }
+        }
+    }
+});
 
     const barCtx = document.getElementById('barChart').getContext('2d');
     const lineCtx = document.getElementById('lineChart').getContext('2d');
